@@ -1,14 +1,12 @@
 # Projeto de Sistemas Distribuídos 2015-2016 #
 
-Grupo de SD ... - Campus ...
-*(preencher com número do grupo de SD no Fénix e depois apagar esta linha)*
+Grupo de SD 55 - Campus Alameda
 
-... ... ...
+Pedro Ascensao 78961 rafascen@gmail.com
 
-... ... ...
+Jorge Pessoa 78839 ...
 
-... ... ...
-*(preencher com nome, número e email de membro do grupo e depois apagar esta linha)*
+Miguel Vera 78980 miguel.coimbra.vera@gmail.com
 
 
 Repositório:
