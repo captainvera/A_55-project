@@ -2,15 +2,16 @@
 
 Grupo de SD 55 - Campus Alameda
 
+
 Pedro Ascensao 78961 rafascen@gmail.com
 
-Jorge Pessoa 78839 ...
+Jorge Pessoa 78839 jorge.pessoa@tecnico.ulisboa.pt
 
 Miguel Vera 78980 miguel.coimbra.vera@gmail.com
 
 
 Repositório:
-[tecnico-distsys/C_XX-project](https://github.com/tecnico-distsys/C_XX-project/)
+[tecnico-distsys/A_55-project](https://github.com/tecnico-distsys/A_55-project/)
 
 -------------------------------------------------------------------------------
 
