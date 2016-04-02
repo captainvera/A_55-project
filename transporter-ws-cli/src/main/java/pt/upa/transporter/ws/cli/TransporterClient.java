@@ -18,7 +18,17 @@ public class TransporterClient {
   public void ping() {
     System.out.printf("Pinging transporter%nGot: \"%s%n", _transporter.ping("name")+"\"");
   }
-  
+ 
+  public JobView requestJob(String origin, String destination, int price){
+    JobView response = null;
+    try{
+      response = _transporter.requestJob(origin, destination, price);
+    }catch(Exception e){
+      System.out.println("Error requesting job!");
+    }
+    return response;
+  } 
+
   public void connectToTransporter(String name) throws Exception {
     String uddiURL = "http://localhost:9090";
 
@@ -48,5 +58,26 @@ public class TransporterClient {
     System.out.println("Connection succesful");
     _transporter = port;
   }
+
+  public JobView decideJob(String id, boolean accept){
+    JobView response = null;
+    try{
+      response = _transporter.decideJob(id, accept);
+    }catch(Exception e){
+      System.out.println("Error deciding job!");
+    }
+    return response;
+  }
+
+  public JobView jobStatus(String id){
+    return _transporter.jobStatus(id);
+  } 
   
+  public void clearJobs(){
+    _transporter.clearJobs();
+  }
+
+  public List<JobView> listJobs() {
+    return _transporter.listJobs();
+  } 
 }
