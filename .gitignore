@@ -1,0 +1,6 @@
+#OS SPECIFIC
+.DS_STORE
+#project shenenigans
+.project
+.classpath
+.settings
