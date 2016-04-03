@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <!-- http://maven.apache.org/pom.html#Quick_Overview -->
 
-    <!-- Please replace 'cxx' below with 
-        your c (campus) with a (Alameda) / t (Tagus); and 
+    <!-- Please replace 'cxx' below with
+        your c (campus) with a (Alameda) / t (Tagus); and
         your group number with two digits.
         Then delete this comment. -->
     <groupId>pt.upa.cxx</groupId>
@@ -39,6 +39,11 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
             <version>2.2.10</version>
+        </dependency>
+        <dependency>
+          <groupId>pt.ulisboa.tecnico.sdis</groupId>
+          <artifactId>uddi-naming</artifactId>
+          <version>1.0</version>
         </dependency>
         <!-- JMockit - must appear before JUnit -->
         <dependency>
