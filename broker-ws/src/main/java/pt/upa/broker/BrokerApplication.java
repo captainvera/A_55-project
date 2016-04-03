@@ -45,10 +45,19 @@ public class BrokerApplication {
 		try{
 			if(endpoint != null)
 				endpoint.stop();
-			System.out.printf("Stopping endpoint @ %s%n", url);
+			System.out.printf("Stopping endpoint @%s%n", url);
 		}catch (Exception e){
-			System.out.printf("Caught exception: %s%n", e);
+			System.out.printf("Caught exception when stopping: %s%n", e);
 			e.printStackTrace();
+		}
+	
+		try {
+			if (uddiNaming != null) {
+				uddiNaming.unbind(name);
+				System.out.printf("Deleted '%s' from UDDI%@%s%n", name, uddiURL);
+			}
+		} catch (Exception e) {
+			System.out.printf("Caught exception when unbinding: %s%n", e);
 		}
 	}
 	
