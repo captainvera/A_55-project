@@ -70,7 +70,12 @@ public class BrokerPort implements BrokerPortType{
 	}
 	
 	public void clearTransports(){
-		return;
+		System.out.printf("Executing order 66.%n");
+		for (int i=0; i < transporters.size();i++){
+			transporters.get(i).clearJobs();
+			System.out.printf("Order 66 on transporter %d%n", i+1);
+		}
+		System.out.println("The Sith Shall Rule again.");
 	}
 	
 	public List<TransportView> listTransports(){

@@ -43,6 +43,13 @@ public class BrokerClient {
 	public void ping(String name){
 		System.out.printf("Pinging the Transporters...%nResponse: %s%n", broker.ping(name));	
 	}
+	
+	public void clearTransports(){
+		System.out.println("Clearing all Jobs...");
+		broker.clearTransports();
+		System.out.println("Jobs cleared for all Transporters");
+		
+	}
 
 
 }
