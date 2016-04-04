@@ -61,9 +61,12 @@ public class BrokerPort implements BrokerPortType{
 	}
 
 	public String ping(String name){
-
-		int _num = transporters.size();
-		return "Contact has been established with " + _num + " Transporters.";
+		String res = new String();
+		System.out.printf("Pinging all transporters%n");
+		for (int i=0; i < transporters.size();i++){
+			res = res + transporters.get(i).ping(name);
+		}
+		return "Contact has been established with " + transporters.size() + " Transporters. With messages:\n" + res;
 	}
 
 	protected TransportView getTransportViewById(String id){
@@ -83,7 +86,7 @@ public class BrokerPort implements BrokerPortType{
 		 * O id do transport é igual ao do job ???
 		 */
 
-		 
+
 	}
 
 	public void clearTransports(){
