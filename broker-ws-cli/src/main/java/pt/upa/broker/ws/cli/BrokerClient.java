@@ -41,7 +41,8 @@ public class BrokerClient {
 	}
 	
 	public void ping(String name){
-		System.out.printf("Pinging a broker.%nResponse: %s%n", broker.ping(name));	
+		System.out.printf("Pinging the Transporters...%nResponse: %s%n", broker.ping(name));	
 	}
+
 
 }

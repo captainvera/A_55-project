@@ -1,8 +1,12 @@
 package pt.upa.broker;
 
-import javax.xml.ws.Endpoint;
+import java.util.ArrayList;
+import java.util.Map;
+import pt.upa.transporter.ws.*;
 import pt.upa.broker.ws.*;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import javax.xml.ws.*;
+import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
 
 public class BrokerApplication {
@@ -29,10 +33,9 @@ public class BrokerApplication {
 		uddiNaming = new UDDINaming(uddiURL);
 		uddiNaming.rebind(name, url);
 		
-		//connecting to Transports
-		//while ( )
 		
-		//TODO (erase comment)
+		
+		//TODO (erase commentprint)
 		//being a nice good server
 		//waiting for connections
 		System.out.println("Waiting for connections");
@@ -45,7 +48,7 @@ public class BrokerApplication {
 		try{
 			if(endpoint != null)
 				endpoint.stop();
-			System.out.printf("Stopping endpoint @%s%n", url);
+			System.out.printf("Stopping endpoint @ %s%n", url);
 		}catch (Exception e){
 			System.out.printf("Caught exception when stopping: %s%n", e);
 			e.printStackTrace();
@@ -54,7 +57,7 @@ public class BrokerApplication {
 		try {
 			if (uddiNaming != null) {
 				uddiNaming.unbind(name);
-				System.out.printf("Deleted '%s' from UDDI%@%s%n", name, uddiURL);
+				System.out.printf("Deleted '%s' from UDDI@ %s%n", name, uddiURL);
 			}
 		} catch (Exception e) {
 			System.out.printf("Caught exception when unbinding: %s%n", e);

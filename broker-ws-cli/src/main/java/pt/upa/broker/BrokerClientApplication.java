@@ -10,8 +10,7 @@ public class BrokerClientApplication {
 		BrokerClient brokerclient = new BrokerClient();
 		
 		brokerclient.connectToBroker("UpaBroker");
-		brokerclient.ping("Broker Client");
-		
+		brokerclient.ping("Broker Client");		
 	}
 
 }
