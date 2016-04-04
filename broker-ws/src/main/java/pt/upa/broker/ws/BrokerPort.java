@@ -2,6 +2,7 @@ package pt.upa.broker.ws;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
@@ -25,7 +26,7 @@ import pt.upa.transporter.ws.*;
 
 public class BrokerPort implements BrokerPortType{
 
-	ArrayList<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
+	TreeMap<String, TransporterPortType> transporters = new TreeMap<String, TransporterPortType>();
 	ArrayList<TransportView> _transports = new ArrayList<TransportView>();
 
 	public BrokerPort() throws Exception{
@@ -38,8 +39,8 @@ public class BrokerPort implements BrokerPortType{
 		UDDINaming uddiNaming = new UDDINaming(uURL);
 		//connecting to Transports
 		while (true){
-
-			epAddress = uddiNaming.lookup("UpaTransporter" + transportnum.toString());
+			String name = "UpaTransporter" + transportnum.toString();
+			epAddress = uddiNaming.lookup(name);
 			if(epAddress == null){
 				System.out.printf("UpaTransporter #%d not found%n", transportnum);
 				break;
@@ -54,7 +55,7 @@ public class BrokerPort implements BrokerPortType{
 			Map<String, Object> requestContext = bindingProvider.getRequestContext();
 			requestContext.put(ENDPOINT_ADDRESS_PROPERTY, epAddress);
 			System.out.printf("Connection to %s succesfull%n","UpaTransporter" + transportnum.toString());
-			transporters.add(transp);
+			transporters.put(name, transp);
 			transportnum++;
 
 		}
@@ -63,8 +64,8 @@ public class BrokerPort implements BrokerPortType{
 	public String ping(String name){
 		String res = new String();
 		System.out.printf("Pinging all transporters%n");
-		for (int i=0; i < transporters.size();i++){
-			res = res + transporters.get(i).ping(name);
+		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
+			res = res + entry.getValue().ping(name);
 		}
 		return "Contact has been established with " + transporters.size() + " Transporters. With messages:\n" + res;
 	}
@@ -78,29 +79,51 @@ public class BrokerPort implements BrokerPortType{
     return null;
   }
 
+
 	public TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
 		TransportView tv = getTransportViewById(id);
-		//if(tv==null) throw UnknownTransportFault_Exception
+		if(tv==null) throw new UnknownTransportFault_Exception("Transport with " + id + " not found", new UnknownTransportFault());
 
 		/*
 		 * O id do transport é igual ao do job ???
 		 */
+		 String name = tv.getName();
+		 TransporterPortType tpt = transporters.get(name);
+		 JobStateView state = tpt.jobStatus(id).getJobState();
+		 switch (state) {
+			 	case HEADING:
+			 		tv.setState(TransportStateView.HEADING);
+					break;
 
+				case ONGOING:
+					tv.setState(TransportStateView.ONGOING);
+					break;
 
+				case COMPLETED:
+					tv.setState(TransportStateView.COMPLETED);
+					break;
+
+				default:
+					break;
+			}
+
+			return tv;
 	}
 
 	public void clearTransports(){
+		int i = 0;
 		System.out.printf("Executing order 66.%n");
-		for (int i=0; i < transporters.size();i++){
-			transporters.get(i).clearJobs();
+		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
+			entry.getValue().clearJobs();
 			System.out.printf("Order 66 on transporter %d%n", i+1);
+			i++;
 		}
 		System.out.println("The Sith Shall Rule again.");
 	}
 
 	public List<TransportView> listTransports(){
 
-		return new ArrayList<TransportView>();
+		return new ArrayList<TransportView>(_transports);
 
 	}
 
