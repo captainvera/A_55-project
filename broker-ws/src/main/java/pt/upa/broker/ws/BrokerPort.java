@@ -24,8 +24,10 @@ import pt.upa.transporter.ws.*;
 )
 
 public class BrokerPort implements BrokerPortType{
-	
-	ArrayList<TransporterPortType> transporters = new ArrayList<TransporterPortType>(); 
+
+	ArrayList<TransporterPortType> transporters = new ArrayList<TransporterPortType>();
+	ArrayList<TransportView> _transports = new ArrayList<TransportView>();
+
 	public BrokerPort() throws Exception{
 		System.out.printf("Broker Initalized.");
 		Integer transportnum = new Integer(1);
@@ -36,39 +38,54 @@ public class BrokerPort implements BrokerPortType{
 		UDDINaming uddiNaming = new UDDINaming(uURL);
 		//connecting to Transports
 		while (true){
-			
+
 			epAddress = uddiNaming.lookup("UpaTransporter" + transportnum.toString());
 			if(epAddress == null){
 				System.out.printf("UpaTransporter #%d not found%n", transportnum);
 				break;
 			}else System.out.printf("Connected to transporter #%d%n", transportnum);
-			
+
 			TransporterService service = new TransporterService();
-			
+
 			transp = service.getTransporterPort();
-			
+
 			BindingProvider bindingProvider = (BindingProvider) transp;
-			
+
 			Map<String, Object> requestContext = bindingProvider.getRequestContext();
 			requestContext.put(ENDPOINT_ADDRESS_PROPERTY, epAddress);
 			System.out.printf("Connection to %s succesfull%n","UpaTransporter" + transportnum.toString());
 			transporters.add(transp);
 			transportnum++;
-			
+
 		}
 	}
-	
+
 	public String ping(String name){
-		
+
 		int _num = transporters.size();
 		return "Contact has been established with " + _num + " Transporters.";
 	}
 
-	
+	protected TransportView getTransportViewById(String id){
+		for(TransportView t : _transports){
+      if(t.getId().equals(id)){
+        return t;
+      }
+    }
+    return null;
+  }
+
 	public TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
-		return new TransportView();
+		TransportView tv = getTransportViewById(id);
+		//if(tv==null) throw UnknownTransportFault_Exception
+
+		/*
+		 * O id do transport é igual ao do job ???
+		 */
+
+		 
 	}
-	
+
 	public void clearTransports(){
 		System.out.printf("Executing order 66.%n");
 		for (int i=0; i < transporters.size();i++){
@@ -77,15 +94,15 @@ public class BrokerPort implements BrokerPortType{
 		}
 		System.out.println("The Sith Shall Rule again.");
 	}
-	
+
 	public List<TransportView> listTransports(){
-		
+
 		return new ArrayList<TransportView>();
-	
+
 	}
-	
-	public String requestTransport(String origin, String destination, int price) 
-			throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception, 
+
+	public String requestTransport(String origin, String destination, int price)
+			throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
 			UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception{
 		return "temporary String";
 	}
