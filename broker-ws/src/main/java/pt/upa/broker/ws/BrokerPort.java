@@ -16,21 +16,23 @@ import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import pt.upa.transporter.ws.*;
 
 @WebService(
-		endpointInterface="pt.upa.broker.ws.BrokerPortType",
-		wsdlLocation="broker.1_0.wsdl",
-		name="UpaBroker",
-		portName="BrokerPort",
-		targetNamespace="http://ws.broker.upa.pt/",
-		serviceName = "BrokerService"
+endpointInterface="pt.upa.broker.ws.BrokerPortType",
+wsdlLocation="broker.1_0.wsdl",
+name="UpaBroker",
+portName="BrokerPort",
+targetNamespace="http://ws.broker.upa.pt/",
+serviceName = "BrokerService"
 )
 
 public class BrokerPort implements BrokerPortType{
 
 	TreeMap<String, TransporterPortType> transporters = new TreeMap<String, TransporterPortType>();
 	ArrayList<TransportView> _transports = new ArrayList<TransportView>();
+	int _idCounter;
 
 	public BrokerPort() throws Exception{
 		System.out.printf("Broker Initalized.");
+		_idCounter = 0;
 		Integer transportnum = new Integer(1);
 		String epAddress;
 		TransporterPortType transp;
@@ -72,12 +74,12 @@ public class BrokerPort implements BrokerPortType{
 
 	protected TransportView getTransportViewById(String id){
 		for(TransportView t : _transports){
-      if(t.getId().equals(id)){
-        return t;
-      }
-    }
-    return null;
-  }
+			if(t.getId().equals(id)){
+				return t;
+			}
+		}
+		return null;
+	}
 
 
 	public TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
@@ -85,29 +87,29 @@ public class BrokerPort implements BrokerPortType{
 		if(tv==null) throw new UnknownTransportFault_Exception("Transport with " + id + " not found", new UnknownTransportFault());
 
 		/*
-		 * O id do transport é igual ao do job ???
-		 */
-		 String name = tv.getName();
-		 TransporterPortType tpt = transporters.get(name);
-		 JobStateView state = tpt.jobStatus(id).getJobState();
-		 switch (state) {
-			 	case HEADING:
-			 		tv.setState(TransportStateView.HEADING);
-					break;
+		* O id do transport é igual ao do job ???
+		*/
+		String name = tv.getTransporterCompany();
+		TransporterPortType tpt = transporters.get(name);
+		JobStateView state = tpt.jobStatus(id).getJobState();
+		switch (state) {
+			case HEADING:
+			tv.setState(TransportStateView.HEADING);
+			break;
 
-				case ONGOING:
-					tv.setState(TransportStateView.ONGOING);
-					break;
+			case ONGOING:
+			tv.setState(TransportStateView.ONGOING);
+			break;
 
-				case COMPLETED:
-					tv.setState(TransportStateView.COMPLETED);
-					break;
+			case COMPLETED:
+			tv.setState(TransportStateView.COMPLETED);
+			break;
 
-				default:
-					break;
-			}
+			default:
+			break;
+		}
 
-			return tv;
+		return tv;
 	}
 
 	public void clearTransports(){
@@ -127,10 +129,74 @@ public class BrokerPort implements BrokerPortType{
 
 	}
 
-	public String requestTransport(String origin, String destination, int price)
-			throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
-			UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception{
-		return "temporary String";
+	public Map.Entry<String, TransporterPortType> checkBestTransporter (String origin, String destination, int price, TransportView transport) throws UnknownLocationFault_Exception, InvalidPriceFault_Exception{
+		int min = 101;
+		Map.Entry<String, TransporterPortType> bestTransporter = null;
+
+		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
+			try{
+				JobView proposedJob = entry.getValue().requestJob(origin, destination, price);
+				if (proposedJob != null && proposedJob.getJobPrice() < min){
+					min = proposedJob.getJobPrice();
+					bestTransporter = entry;
+				}
+
+			} catch (BadLocationFault_Exception e) {throw new UnknownLocationFault_Exception(e.getMessage(), new UnknownLocationFault());
+			} catch (BadPriceFault_Exception e) { throw new InvalidPriceFault_Exception(e.getMessage(), new InvalidPriceFault());}
+		}
+		transport.setPrice(min);
+		transport.setTransporterCompany(bestTransporter.getKey());
+		return bestTransporter;
+	}
+
+	public void confirmJob(Map.Entry<String, TransporterPortType> bestTransporter, String idRequest){
+		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
+			try{ //WUUUUUUUUUUUUUUT need halp here
+				if (bestTransporter.getKey().equals(entry.getKey()))
+				entry.getValue().decideJob(idRequest, true);
+
+				else entry.getValue().decideJob(idRequest, false);
+			} catch (BadJobFault_Exception e){}
+
+		}
+	}
+
+	public void rejectAllOptions (String idRequest){
+		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
+			try{
+				entry.getValue().decideJob(idRequest, false);
+			} catch (BadJobFault_Exception e){}
+		}
+	}
+
+	public String requestTransport(String origin, String destination, int priceMax)
+	throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
+	UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+
+		String idRequest = origin + "T" + destination + "ID" + _idCounter;
+		_idCounter++;
+		String res = "";
+		TransportView newTransport = new TransportView();
+		newTransport.setId(idRequest);
+		newTransport.setOrigin(origin);
+		newTransport.setDestination(destination);
+		newTransport.setState(TransportStateView.REQUESTED);
+		Map.Entry<String, TransporterPortType> bestTransporter = checkBestTransporter(origin, destination, priceMax, newTransport);
+
+		newTransport.setState(TransportStateView.BUDGETED);
+
+		if(newTransport.getPrice() > priceMax){
+			rejectAllOptions(idRequest);
+			newTransport.setState(TransportStateView.FAILED);
+			res = "Request Failed";
+		}
+		else{
+			confirmJob(bestTransporter, idRequest);
+			newTransport.setState(TransportStateView.BOOKED);
+			res = "Request accepted by " + newTransport.getTransporterCompany();
+		}
+		_transports.add(newTransport);
+		return idRequest;
 	}
 
 }
