@@ -183,12 +183,17 @@ public class BrokerPort implements BrokerPortType{
 		newTransport.setState(TransportStateView.REQUESTED);
 		Map.Entry<String, TransporterPortType> bestTransporter = checkBestTransporter(origin, destination, priceMax, newTransport);
 
+		if(bestTransporter == null){
+			newTransport.setState(TransportStateView.FAILED);
+			throw new UnavailableTransportFault_Exception("No Transport Available", new UnavailableTransportFault());
+		}
+
 		newTransport.setState(TransportStateView.BUDGETED);
 
 		if(newTransport.getPrice() > priceMax){
 			rejectAllOptions(idRequest);
 			newTransport.setState(TransportStateView.FAILED);
-			res = "Request Failed";
+			throw new UnavailableTransportPriceFault_Exception("Price above maximum given by client", new UnavailableTransportPriceFault());
 		}
 		else{
 			confirmJob(bestTransporter, idRequest);
