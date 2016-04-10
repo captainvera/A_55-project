@@ -19,13 +19,9 @@ public class TransporterClient {
     System.out.printf("Pinging transporter%nGot: \"%s%n", _transporter.ping("name")+"\"");
   }
  
-  public JobView requestJob(String origin, String destination, int price){
+  public JobView requestJob(String origin, String destination, int price) throws BadLocationFault_Exception, BadPriceFault_Exception {
     JobView response = null;
-    try{
-      response = _transporter.requestJob(origin, destination, price);
-    }catch(Exception e){
-      System.out.println("Error requesting job!");
-    }
+    response = _transporter.requestJob(origin, destination, price);
     return response;
   } 
 
@@ -59,13 +55,9 @@ public class TransporterClient {
     _transporter = port;
   }
 
-  public JobView decideJob(String id, boolean accept){
+  public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
     JobView response = null;
-    try{
-      response = _transporter.decideJob(id, accept);
-    }catch(Exception e){
-      System.out.println("Error deciding job!");
-    }
+    response = _transporter.decideJob(id, accept);
     return response;
   }
 
