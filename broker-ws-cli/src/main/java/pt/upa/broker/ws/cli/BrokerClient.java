@@ -49,7 +49,7 @@ public class BrokerClient {
 
 	public void clearTransports(){
 		System.out.println("Clearing all Jobs...");
-		broker.clearTransports();\
+		broker.clearTransports();
 		System.out.println("Jobs cleared for all Transporters");
 
 	}
