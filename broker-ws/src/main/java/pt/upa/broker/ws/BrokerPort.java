@@ -41,29 +41,29 @@ public class BrokerPort implements BrokerPortType{
     Viseu(Zone.CENTRO),
     Guarda(Zone.CENTRO),
     Setubal(Zone.SUL),
-    Evora(Zone.SUL), 
+    Evora(Zone.SUL),
     Portalegre(Zone.SUL),
     Beja(Zone.SUL),
-    Faro(Zone.SUL); 
-    
+    Faro(Zone.SUL);
+
     private Zone _zone;
 
     private Location(Zone z){
-      this._zone = z; 
+      this._zone = z;
     }
-   
+
     public boolean NORTE(){
       return _zone.equals(Zone.NORTE);
-    } 
-    
+    }
+
     public boolean SUL(){
       return _zone.equals(Zone.SUL);
-    } 
+    }
 
     public boolean CENTRO(){
       return _zone.equals(Zone.CENTRO);
-    } 
-    
+    }
+
     public Zone getZone(){
       return _zone;
     }
@@ -86,7 +86,7 @@ public class BrokerPort implements BrokerPortType{
         return null;
       }
     }
-  } 
+  }
 
 	TreeMap<String, TransporterPortType> transporters = new TreeMap<String, TransporterPortType>();
 	ArrayList<TransportView> _transports = new ArrayList<TransportView>();
@@ -146,7 +146,11 @@ public class BrokerPort implements BrokerPortType{
 
 	public TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
 		TransportView tv = getTransportViewById(id);
-		if(tv==null) throw new UnknownTransportFault_Exception("Transport with " + id + " not found", new UnknownTransportFault());
+		if(tv == null){
+      UnknownTransportFault utf = new UnknownTransportFault();
+      utf.setId(id);
+      throw new UnknownTransportFault_Exception("Transport with " + id + " not found", utf);
+    }
 
 		/*
 		* O id do transport é igual ao do job ???
@@ -191,7 +195,8 @@ public class BrokerPort implements BrokerPortType{
 
 	}
 
-	public Map.Entry<String, TransporterPortType> checkBestTransporter (String origin, String destination, int price, TransportView transport) throws UnknownLocationFault_Exception, InvalidPriceFault_Exception{
+	public Map.Entry<String, TransporterPortType> checkBestTransporter (String origin, String destination, int price, TransportView transport)
+  throws UnknownLocationFault_Exception, InvalidPriceFault_Exception{
 		int min = 101;
 		Map.Entry<String, TransporterPortType> bestTransporter = null;
 
@@ -203,8 +208,9 @@ public class BrokerPort implements BrokerPortType{
 					bestTransporter = entry;
 				}
 
-			} catch (BadLocationFault_Exception e) {throw new UnknownLocationFault_Exception(e.getMessage(), new UnknownLocationFault());
-			} catch (BadPriceFault_Exception e) { throw new InvalidPriceFault_Exception(e.getMessage(), new InvalidPriceFault());}
+			} catch (BadLocationFault_Exception e) {
+			} catch (BadPriceFault_Exception e) {
+      }
 		}
 		transport.setPrice(min);
 		transport.setTransporterCompany(bestTransporter.getKey());
@@ -238,6 +244,28 @@ public class BrokerPort implements BrokerPortType{
 		String idRequest = origin + "T" + destination + "ID" + _idCounter;
 		_idCounter++;
 		String res = "";
+
+    Location l_origin = Location.fromValue(origin);
+    Location l_destination = Location.fromValue(destination);
+
+    if(l_origin == null){
+      UnknownLocationFault ulf = new UnknownLocationFault();
+      ulf.setLocation(origin);
+      throw new UnknownLocationFault_Exception("Invalid origin:", ulf);
+    }
+
+    if(l_destination == null){
+      UnknownLocationFault ulf = new UnknownLocationFault();
+      ulf.setLocation(destination);
+      throw new UnknownLocationFault_Exception("Invalid destination:", ulf);
+    }
+
+    if(priceMax < 0) {
+      InvalidPriceFault ipf = new InvalidPriceFault();
+      ipf.setPrice(priceMax);
+      throw new InvalidPriceFault_Exception("Invalid price:", ipf);
+    }
+
 		TransportView newTransport = new TransportView();
 		newTransport.setId(idRequest);
 		newTransport.setOrigin(origin);
@@ -245,12 +273,22 @@ public class BrokerPort implements BrokerPortType{
 		newTransport.setState(TransportStateView.REQUESTED);
 		Map.Entry<String, TransporterPortType> bestTransporter = checkBestTransporter(origin, destination, priceMax, newTransport);
 
+		if(bestTransporter == null){
+			newTransport.setState(TransportStateView.FAILED);
+      UnavailableTransportFault utf = new UnavailableTransportFault();
+      utf.setOrigin(origin);
+      utf.setDestination(destination);
+			throw new UnavailableTransportFault_Exception("No Transport Available", utf);
+		}
+
 		newTransport.setState(TransportStateView.BUDGETED);
 
 		if(newTransport.getPrice() > priceMax){
 			rejectAllOptions(idRequest);
 			newTransport.setState(TransportStateView.FAILED);
-			res = "Request Failed";
+      UnavailableTransportPriceFault utpf = new UnavailableTransportPriceFault();
+      utpf.setBestPriceFound(newTransport.getPrice());
+			throw new UnavailableTransportPriceFault_Exception("Price above maximum given by client", utpf);
 		}
 		else{
 			confirmJob(bestTransporter, idRequest);
