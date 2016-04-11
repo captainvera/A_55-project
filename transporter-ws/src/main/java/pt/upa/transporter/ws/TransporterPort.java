@@ -35,6 +35,9 @@ public class TransporterPort implements TransporterPortType {
     _name = name;
     _num = Character.getNumericValue(name.charAt(name.length() - 1));
 
+    
+    _even = (_num%2==0);
+
     if(_num%2==0) _even = true;
     else _even = false;
     
@@ -67,7 +70,7 @@ public class TransporterPort implements TransporterPortType {
       throw new BadLocationFault_Exception("Invalid location:", blf);
     }    
     
-    if(_even){
+    if(!_even){
       if(l_origin.NORTE()){ 
         return null;
       }else if(l_destination.NORTE()){
@@ -96,7 +99,7 @@ public class TransporterPort implements TransporterPortType {
     }else if(price <= 10){
       price = (price == 0) ? 0 : price-1; 
     }else{
-      if(_even){
+      if(price%2==0){
         price = (_even) ? price-10 : price+10;
       }else{
         price = (_even) ? price+10 : price-10;

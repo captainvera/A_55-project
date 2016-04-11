@@ -3,6 +3,7 @@ package pt.upa.transporter.ws;
 import org.junit.*;
 import static org.junit.Assert.*;
 
+
 /**
  *  Unit Test example
  *  
@@ -18,7 +19,6 @@ public class ExampleTest {
 
     @BeforeClass
     public static void oneTimeSetUp() {
-
     }
 
     @AfterClass
@@ -49,5 +49,4 @@ public class ExampleTest {
         // assertEquals(expected, actual);
         // if the assert fails, the test fails
     }
-
 }
