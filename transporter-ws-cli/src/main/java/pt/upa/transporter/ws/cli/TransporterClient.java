@@ -1,4 +1,4 @@
-!package pt.upa.transporter.ws.cli;
+package pt.upa.transporter.ws.cli;
 
 import java.util.*;
 import javax.xml.ws.*;

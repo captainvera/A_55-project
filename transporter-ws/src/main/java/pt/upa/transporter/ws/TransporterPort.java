@@ -1,7 +1,11 @@
 package pt.upa.transporter.ws;
 
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import javax.jws.WebService;
 import pt.upa.broker.ws.BrokerPort.Location; 
 
@@ -15,14 +19,64 @@ import pt.upa.broker.ws.BrokerPort.Location;
 )
 public class TransporterPort implements TransporterPortType {
 
-  protected ArrayList<JobView> _jobs;
+  protected ArrayList<Job> _jobs;
   protected String _name;
   protected int _num;
   protected int _idCounter;
   protected boolean _even;
+  
+  /**
+   * -----------------------------------------------
+   * Timer Logic
+   */
 
-  protected JobView getJobByIdentifier(String identifier){
-    for(JobView j : _jobs){
+  protected int randomInterval(int min, int max){
+    Random rand = new Random();
+    int t = rand.nextInt((max-min)+1)+min;
+    return t;
+  }
+
+  protected void setHeadingInterval(Job j){
+    Timer t = new Timer();
+
+    t.schedule(new TimerTask(){
+      @Override
+      public void run() {
+        j.setJobState(JobStateView.HEADING);
+        setOngoingInterval(j);
+      }
+    }, randomInterval(1000,5000));
+  }
+  
+  protected void setOngoingInterval(Job j){
+    Timer t = new Timer();
+
+    t.schedule(new TimerTask(){
+      @Override
+      public void run() {
+        j.setJobState(JobStateView.ONGOING);
+        setCompletedInterval(j);
+      }
+    }, randomInterval(1000,5000));
+  }
+  
+  protected void setCompletedInterval(Job j){
+    Timer t = new Timer();
+
+    t.schedule(new TimerTask(){
+      @Override
+      public void run() {
+        j.setJobState(JobStateView.COMPLETED);
+      }
+    }, randomInterval(1000,5000));
+  }
+
+  /*
+   * ------------------------------------------------
+   */
+
+  protected Job getJobByIdentifier(String identifier){
+    for(Job j : _jobs){
       if(j.getJobIdentifier().equals(identifier)){
         return j;
       }
@@ -41,7 +95,7 @@ public class TransporterPort implements TransporterPortType {
     if(_num%2==0) _even = true;
     else _even = false;
     
-    _jobs = new ArrayList<JobView>();
+    _jobs = new ArrayList<Job>();
     System.out.printf("Created TransporterPort with name %s and last digit %d%n", _name, _num);
   }
 
@@ -110,23 +164,18 @@ public class TransporterPort implements TransporterPortType {
      * Response message construction
      */ 
 
-    JobView jv = new JobView();
-    jv.setCompanyName(_name);
     String identifier = origin + "T" + destination + "ID" + _idCounter;
-    jv.setJobIdentifier(identifier);
     _idCounter++;
-    jv.setJobOrigin(origin);
-    jv.setJobDestination(destination);
-    jv.setJobPrice(price);
-    jv.setJobState(JobStateView.PROPOSED);
+
+    Job jv = new Job(_name, identifier, origin, destination, price, JobStateView.PROPOSED);
 
     _jobs.add(jv);
 
-    return jv;
+    return jv.toJobView();
   }
   
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
-    JobView jv = getJobByIdentifier(id);
+    Job jv = getJobByIdentifier(id);
     if(jv == null){
       BadJobFault bjf = new BadJobFault();
       bjf.setId(id);
@@ -134,18 +183,24 @@ public class TransporterPort implements TransporterPortType {
     }  
     if(accept){
       jv.setJobState(JobStateView.ACCEPTED);
+      setHeadingInterval(jv);
     }else{
       jv.setJobState(JobStateView.REJECTED);
     }
-    return jv;
+    return jv.toJobView();
   }
   
-  public JobView jobStatus(String id){
-    return getJobByIdentifier(id);
+  public JobView jobStatus(String id) {
+    Job j = getJobByIdentifier(id);
+    return (j == null) ? null : j.toJobView();
   }
 
   public List<JobView> listJobs(){
-    return new ArrayList<JobView>(_jobs);
+    ArrayList<JobView> _jviews = new ArrayList<JobView>();
+    for(Job j : _jobs){
+      _jviews.add(j.toJobView());
+    }
+    return _jviews;
   }
 
   public void clearJobs(){
