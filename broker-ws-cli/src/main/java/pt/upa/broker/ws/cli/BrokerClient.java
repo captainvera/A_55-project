@@ -43,8 +43,8 @@ public class BrokerClient {
 
 	}
 
-	public void ping(String name){
-		System.out.printf("Pinging the Transporters...%nResponse: %s%n", broker.ping(name));
+	public String ping(String name){
+		return broker.ping(name);
 	}
 
 	public void clearTransports(){
@@ -64,14 +64,12 @@ public class BrokerClient {
 			return response;
 		}
 
-		public String requestTransport(String origin, String destination, int priceMax){
+		public String requestTransport(String origin, String destination, int priceMax)
+		throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
+		UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
 			System.out.println("Request Received Origin: " + origin + " Destination: " + destination);
 			String response = null;
-			try{
-				response = broker.requestTransport(origin, destination, priceMax);
-			} catch (InvalidPriceFault_Exception | UnavailableTransportFault_Exception |UnavailableTransportPriceFault_Exception | UnknownLocationFault_Exception e) {
-				System.out.println("ERROR IN REQUESTING");
-			}
+			response = broker.requestTransport(origin, destination, priceMax);
 			return response;
 		}
 

@@ -121,7 +121,7 @@ public class BrokerPort implements BrokerPortType{
 			System.out.printf("Connection to %s succesfull%n","UpaTransporter" + transportnum.toString());
 			transporters.put(name, transp);
 			transportnum++;
-
+      epAddress = null;
 		}
 	}
 
@@ -208,12 +208,23 @@ public class BrokerPort implements BrokerPortType{
 					bestTransporter = entry;
 				}
 
-			} catch (BadLocationFault_Exception e) {
-			} catch (BadPriceFault_Exception e) {
+			}
+      catch (BadLocationFault_Exception e) {
+        UnknownLocationFault ulf = new UnknownLocationFault();
+        ulf.setLocation(e.getFaultInfo().getLocation());
+        throw new UnknownLocationFault_Exception("Invalid location:", ulf);
+			}
+      catch (BadPriceFault_Exception e) {
+        InvalidPriceFault ipf = new InvalidPriceFault();
+        ipf.setPrice(e.getFaultInfo().getPrice());
+        throw new InvalidPriceFault_Exception("Invalid price:", ipf);
       }
 		}
-		transport.setPrice(min);
-		transport.setTransporterCompany(bestTransporter.getKey());
+
+    if(bestTransporter != null){
+		  transport.setPrice(min);
+		  transport.setTransporterCompany(bestTransporter.getKey());
+    }
 		return bestTransporter;
 	}
 
@@ -224,8 +235,9 @@ public class BrokerPort implements BrokerPortType{
 				entry.getValue().decideJob(idRequest, true);
 
 				else entry.getValue().decideJob(idRequest, false);
-			} catch (BadJobFault_Exception e){}
-
+			} catch (BadJobFault_Exception e){
+        e.printStackTrace();
+      }
 		}
 	}
 
@@ -233,7 +245,9 @@ public class BrokerPort implements BrokerPortType{
 		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
 			try{
 				entry.getValue().decideJob(idRequest, false);
-			} catch (BadJobFault_Exception e){}
+			} catch (BadJobFault_Exception e){
+        System.out.println("NAO TENHO ESSE MAMBO");
+      }
 		}
 	}
 
@@ -260,7 +274,7 @@ public class BrokerPort implements BrokerPortType{
       throw new UnknownLocationFault_Exception("Invalid destination:", ulf);
     }
 
-    if(priceMax < 0) {
+    if(priceMax <= 0) {
       InvalidPriceFault ipf = new InvalidPriceFault();
       ipf.setPrice(priceMax);
       throw new InvalidPriceFault_Exception("Invalid price:", ipf);

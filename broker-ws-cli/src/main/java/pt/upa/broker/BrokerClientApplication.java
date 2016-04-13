@@ -15,10 +15,8 @@ public class BrokerClientApplication {
 		brokerclient.clearTransports();
 		String request = brokerclient.requestTransport("Lisboa", "Leiria", 10);
 		System.out.println ("REQUEST: " + request);
-		while(true){
-			TransportView tv = brokerclient.viewTransport(request);
-			System.out.println("[RESPONSE] " + tv.getId() + " | STATE: " + tv.getState().value());
-		}
+		TransportView tv = brokerclient.viewTransport(request);
+		System.out.println("[RESPONSE] " + tv.getId() + " | STATE: " + tv.getState().value());
 	}
-	
+
 }
