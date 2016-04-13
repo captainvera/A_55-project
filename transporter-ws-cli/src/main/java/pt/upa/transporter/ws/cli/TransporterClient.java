@@ -15,8 +15,8 @@ public class TransporterClient {
   public TransporterClient() {
   }
 
-  public void ping() {
-    System.out.printf("Pinging transporter%nGot: \"%s%n", _transporter.ping("name")+"\"");
+  public String ping() {
+		return _transporter.ping("name");
   }
  
   public JobView requestJob(String origin, String destination, int price) throws BadLocationFault_Exception, BadPriceFault_Exception {
@@ -55,6 +55,18 @@ public class TransporterClient {
     _transporter = port;
   }
 
+  public void connectToTransporterByURI(String endp) throws Exception {
+    TransporterPortType port = null;
+    TransporterService service = new TransporterService();
+    port = service.getTransporterPort();		
+    System.out.println("Setting endpoint address ...");
+    BindingProvider bindingProvider = (BindingProvider) port;
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endp);
+    System.out.println("Connection succesful");
+    _transporter = port;
+  }
+  
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
     JobView response = null;
     response = _transporter.decideJob(id, accept);

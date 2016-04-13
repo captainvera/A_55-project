@@ -100,7 +100,7 @@ public class TransporterPort implements TransporterPortType {
   }
 
   public String ping(String name) {
-    return _name + " returning ping from " + name;
+    return _name;
   }
 
   public JobView requestJob(String origin, String destination, int price) throws BadLocationFault_Exception, BadPriceFault_Exception {

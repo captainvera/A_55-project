@@ -7,13 +7,14 @@ import java.util.TreeMap;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.jws.WebService;
 import javax.xml.ws.BindingProvider;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
-
 import pt.upa.transporter.ws.*;
+import pt.upa.transporter.ws.cli.*;
 
 @WebService(
 endpointInterface="pt.upa.broker.ws.BrokerPortType",
@@ -88,50 +89,45 @@ public class BrokerPort implements BrokerPortType{
     }
   }
 
-	TreeMap<String, TransporterPortType> transporters = new TreeMap<String, TransporterPortType>();
+	TreeMap<String, TransporterClient> transporters = new TreeMap<String, TransporterClient>();
 	ArrayList<TransportView> _transports = new ArrayList<TransportView>();
 	int _idCounter;
 
 	public BrokerPort() throws Exception{
-		System.out.printf("Broker Initalized.");
-		_idCounter = 0;
-		Integer transportnum = new Integer(1);
-		String epAddress;
-		TransporterPortType transp;
+		System.out.println("Broker Initalized.");
+		connectToTransporters();
+	}
+	
+	private void connectToTransporters() throws Exception{
+		System.out.println("Checking for Transporters.");
+		
 		String uURL = "http://localhost:9090";
-
 		UDDINaming uddiNaming = new UDDINaming(uURL);
-		//connecting to Transports
-		while (true){
-			String name = "UpaTransporter" + transportnum.toString();
-			epAddress = uddiNaming.lookup(name);
-			if(epAddress == null){
-				System.out.printf("UpaTransporter #%d not found%n", transportnum);
-				break;
-			}else System.out.printf("Connected to transporter #%d%n", transportnum);
-
-			TransporterService service = new TransporterService();
-
-			transp = service.getTransporterPort();
-
-			BindingProvider bindingProvider = (BindingProvider) transp;
-
-			Map<String, Object> requestContext = bindingProvider.getRequestContext();
-			requestContext.put(ENDPOINT_ADDRESS_PROPERTY, epAddress);
-			System.out.printf("Connection to %s succesfull%n","UpaTransporter" + transportnum.toString());
-			transporters.put(name, transp);
-			transportnum++;
-
-		}
+		Collection<String> endpoints = uddiNaming.list("UpaTransporter%");
+		System.out.println("Creating clients to connect to " + endpoints.size() + " Transporters");
+		createTransporterClients(endpoints);
+		
 	}
 
+	private void createTransporterClients( Collection<String> endpoints) throws Exception{
+		String name;
+		for (String endp : endpoints) {
+			TransporterClient client = new TransporterClient();
+			client.connectToTransporterByURI(endp);
+			name = client.ping();
+			transporters.put(name,client);
+			System.out.println("Transporter: " + name + " was added to broker");
+		}
+		
+	}
+	
 	public String ping(String name){
 		String res = new String();
 		System.out.printf("Pinging all transporters%n");
-		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
-			res = res + entry.getValue().ping(name);
+		for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
+			entry.getValue().ping();
 		}
-		return "Contact has been established with " + transporters.size() + " Transporters. With messages:\n" + res;
+		return "Contact has been established with " + transporters.size() + " Transporters.\n";
 	}
 
 	protected TransportView getTransportViewById(String id){
@@ -156,7 +152,7 @@ public class BrokerPort implements BrokerPortType{
 		* O id do transport é igual ao do job ???
 		*/
 		String name = tv.getTransporterCompany();
-		TransporterPortType tpt = transporters.get(name);
+		TransporterClient tpt = transporters.get(name);
 		JobStateView state = tpt.jobStatus(id).getJobState();
 		switch (state) {
 			case HEADING:
@@ -181,7 +177,7 @@ public class BrokerPort implements BrokerPortType{
 	public void clearTransports(){
 		int i = 0;
 		System.out.printf("Executing order 66.%n");
-		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
+		for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
 			entry.getValue().clearJobs();
 			System.out.printf("Order 66 on transporter %d%n", i+1);
 			i++;
@@ -195,12 +191,12 @@ public class BrokerPort implements BrokerPortType{
 
 	}
 
-	public Map.Entry<String, TransporterPortType> checkBestTransporter (String origin, String destination, int price, TransportView transport)
+	public Map.Entry<String, TransporterClient> checkBestTransporter (String origin, String destination, int price, TransportView transport)
   throws UnknownLocationFault_Exception, InvalidPriceFault_Exception{
 		int min = 101;
-		Map.Entry<String, TransporterPortType> bestTransporter = null;
+		Map.Entry<String, TransporterClient> bestTransporter = null;
 
-		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
+		for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
 			try{
 				JobView proposedJob = entry.getValue().requestJob(origin, destination, price);
 				if (proposedJob != null && proposedJob.getJobPrice() < min){
@@ -217,8 +213,8 @@ public class BrokerPort implements BrokerPortType{
 		return bestTransporter;
 	}
 
-	public void confirmJob(Map.Entry<String, TransporterPortType> bestTransporter, String idRequest){
-		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
+	public void confirmJob(Map.Entry<String, TransporterClient> bestTransporter, String idRequest){
+		for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
 			try{ //WUUUUUUUUUUUUUUT need halp here
 				if (bestTransporter.getKey().equals(entry.getKey()))
 				entry.getValue().decideJob(idRequest, true);
@@ -230,7 +226,7 @@ public class BrokerPort implements BrokerPortType{
 	}
 
 	public void rejectAllOptions (String idRequest){
-		for (Map.Entry<String, TransporterPortType> entry : transporters.entrySet()){
+		for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
 			try{
 				entry.getValue().decideJob(idRequest, false);
 			} catch (BadJobFault_Exception e){}
@@ -271,7 +267,7 @@ public class BrokerPort implements BrokerPortType{
 		newTransport.setOrigin(origin);
 		newTransport.setDestination(destination);
 		newTransport.setState(TransportStateView.REQUESTED);
-		Map.Entry<String, TransporterPortType> bestTransporter = checkBestTransporter(origin, destination, priceMax, newTransport);
+		Map.Entry<String, TransporterClient> bestTransporter = checkBestTransporter(origin, destination, priceMax, newTransport);
 
 		if(bestTransporter == null){
 			newTransport.setState(TransportStateView.FAILED);
