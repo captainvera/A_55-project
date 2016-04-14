@@ -8,7 +8,6 @@ import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import javax.xml.ws.*;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
-
 public class BrokerApplication {
 
 	public static void main(String[] args) throws Exception {
@@ -35,7 +34,7 @@ public class BrokerApplication {
 		
 		
 		
-		//TODO (erase commentprint)
+		//TODO (erase comment print)
 		//being a nice good server
 		//waiting for connections
 		System.out.println("Waiting for connections");
