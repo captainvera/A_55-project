@@ -97,16 +97,16 @@ public class BrokerPort implements BrokerPortType{
 		System.out.println("Broker Initalized.");
 		connectToTransporters();
 	}
-	
+
 	private void connectToTransporters() throws Exception{
 		System.out.println("Checking for Transporters.");
-		
+
 		String uURL = "http://localhost:9090";
 		UDDINaming uddiNaming = new UDDINaming(uURL);
 		Collection<String> endpoints = uddiNaming.list("UpaTransporter%");
 		System.out.println("Creating clients to connect to " + endpoints.size() + " Transporters");
 		createTransporterClients(endpoints);
-		
+
 	}
 
 	private void createTransporterClients( Collection<String> endpoints) throws Exception{
@@ -118,9 +118,9 @@ public class BrokerPort implements BrokerPortType{
 			transporters.put(name,client);
 			System.out.println("Transporter: " + name + " was added to broker");
 		}
-		
+
 	}
-	
+
 	public String ping(String name){
 		String res = new String();
 		System.out.printf("Pinging all transporters%n");
@@ -191,19 +191,51 @@ public class BrokerPort implements BrokerPortType{
 
 	}
 
-	public Map.Entry<String, TransporterClient> checkBestTransporter (String origin, String destination, int price, TransportView transport)
-  throws UnknownLocationFault_Exception, InvalidPriceFault_Exception{
+	public void checkBestTransporter (ArrayList<JobView> jobs, TransportView transport){
 		int min = 101;
-		Map.Entry<String, TransporterClient> bestTransporter = null;
+		JobView bestJob = null;
 
-		for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
+    for(JobView job : jobs){
+		  if(job.getJobPrice() < min){
+		      transport.setTransporterCompany(job.getCompanyName());
+          transport.setPrice(job.getJobPrice());
+          transport.setId(job.getJobIdentifier());
+          min = job.getJobPrice();
+      }
+    }
+	}
+
+	public void confirmJob(ArrayList<JobView> jobs, TransportView transport){
+		for (JobView job : jobs){
+			try{
+				if (transport.getTransporterCompany().equals(job.getCompanyName()))
+				transporters.get(job.getCompanyName()).decideJob(job.getJobIdentifier(), true);
+
+				else transporters.get(job.getCompanyName()).decideJob(job.getJobIdentifier(), false);
+
+			} catch (BadJobFault_Exception e){
+        e.printStackTrace();
+      }
+		}
+	}
+
+	public void rejectAllOptions (ArrayList<JobView> jobs){
+		for (JobView job : jobs){
+			try{
+				transporters.get(job.getCompanyName()).decideJob(job.getJobIdentifier(), false);
+			} catch (BadJobFault_Exception e){
+        e.printStackTrace();
+      }
+		}
+	}
+
+  public ArrayList<JobView> makeRequests(String origin, String destination, int price)
+  throws InvalidPriceFault_Exception, UnknownLocationFault_Exception{
+    ArrayList<JobView> _jobs = new ArrayList<JobView>();
+    for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
 			try{
 				JobView proposedJob = entry.getValue().requestJob(origin, destination, price);
-				if (proposedJob != null && proposedJob.getJobPrice() < min){
-					min = proposedJob.getJobPrice();
-					bestTransporter = entry;
-				}
-
+				if (proposedJob != null) _jobs.add(proposedJob);
 			}
       catch (BadLocationFault_Exception e) {
         UnknownLocationFault ulf = new UnknownLocationFault();
@@ -216,43 +248,13 @@ public class BrokerPort implements BrokerPortType{
         throw new InvalidPriceFault_Exception("Invalid price:", ipf);
       }
 		}
-
-    if(bestTransporter != null){
-		  transport.setPrice(min);
-		  transport.setTransporterCompany(bestTransporter.getKey());
-    }
-		return bestTransporter;
-	}
-
-	public void confirmJob(Map.Entry<String, TransporterClient> bestTransporter, String idRequest){
-		for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
-			try{ //WUUUUUUUUUUUUUUT need halp here
-				if (bestTransporter.getKey().equals(entry.getKey()))
-				entry.getValue().decideJob(idRequest, true);
-
-				else entry.getValue().decideJob(idRequest, false);
-			} catch (BadJobFault_Exception e){
-        e.printStackTrace();
-      }
-		}
-	}
-
-	public void rejectAllOptions (String idRequest){
-		for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
-			try{
-				entry.getValue().decideJob(idRequest, false);
-			} catch (BadJobFault_Exception e){
-        System.out.println("NAO TENHO ESSE MAMBO");
-      }
-		}
-	}
+    return _jobs;
+  }
 
 	public String requestTransport(String origin, String destination, int priceMax)
 	throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
 	UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
 
-		String idRequest = origin + "T" + destination + "ID" + _idCounter;
-		_idCounter++;
 		String res = "";
 
     Location l_origin = Location.fromValue(origin);
@@ -277,13 +279,13 @@ public class BrokerPort implements BrokerPortType{
     }
 
 		TransportView newTransport = new TransportView();
-		newTransport.setId(idRequest);
 		newTransport.setOrigin(origin);
 		newTransport.setDestination(destination);
 		newTransport.setState(TransportStateView.REQUESTED);
-		Map.Entry<String, TransporterClient> bestTransporter = checkBestTransporter(origin, destination, priceMax, newTransport);
 
-		if(bestTransporter == null){
+    ArrayList<JobView> _jobs = makeRequests(origin, destination, priceMax);
+
+    if(_jobs.isEmpty()){
 			newTransport.setState(TransportStateView.FAILED);
       UnavailableTransportFault utf = new UnavailableTransportFault();
       utf.setOrigin(origin);
@@ -291,22 +293,24 @@ public class BrokerPort implements BrokerPortType{
 			throw new UnavailableTransportFault_Exception("No Transport Available", utf);
 		}
 
+		checkBestTransporter(_jobs, newTransport);
+
 		newTransport.setState(TransportStateView.BUDGETED);
 
 		if(newTransport.getPrice() > priceMax){
-			rejectAllOptions(idRequest);
+			rejectAllOptions(_jobs);
 			newTransport.setState(TransportStateView.FAILED);
       UnavailableTransportPriceFault utpf = new UnavailableTransportPriceFault();
       utpf.setBestPriceFound(newTransport.getPrice());
 			throw new UnavailableTransportPriceFault_Exception("Price above maximum given by client", utpf);
 		}
+
 		else{
-			confirmJob(bestTransporter, idRequest);
+			confirmJob(_jobs, newTransport);
 			newTransport.setState(TransportStateView.BOOKED);
-			res = "Request accepted by " + newTransport.getTransporterCompany();
 		}
 		_transports.add(newTransport);
-		return idRequest;
+		return newTransport.getId();
 	}
 
 }
