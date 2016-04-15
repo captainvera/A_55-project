@@ -39,10 +39,6 @@ public class TransporterITTest {
 
   @AfterClass
   public static void oneTimeTearDown() {
-    try { 
-    }catch(Exception e ){
-      System.out.println(e.getMessage());
-    }
   }
 
 

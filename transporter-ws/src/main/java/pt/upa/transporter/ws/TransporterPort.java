@@ -106,7 +106,7 @@ public class TransporterPort implements TransporterPortType {
   public JobView requestJob(String origin, String destination, int price) throws BadLocationFault_Exception, BadPriceFault_Exception {
   
     /**
-     * Location checking
+     * Location checking ------------------------------------------------------------
      */
 
     Location l_origin = Location.fromValue(origin);
@@ -139,7 +139,7 @@ public class TransporterPort implements TransporterPortType {
     } 
     
     /**
-     * Price checking
+     * Price checking -----------------------------------------------------------------
      */
 
     if(price < 0) {
@@ -161,7 +161,7 @@ public class TransporterPort implements TransporterPortType {
     }
    
     /**
-     * Response message construction
+     * Response message construction --------------------------------------------------
      */ 
 
     String identifier = origin + "T" + destination + "ID" + _idCounter;
@@ -176,7 +176,7 @@ public class TransporterPort implements TransporterPortType {
   
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
     Job jv = getJobByIdentifier(id);
-    if(jv == null){
+    if(jv == null || jv.getJobState() != JobStateView.PROPOSED){
       BadJobFault bjf = new BadJobFault();
       bjf.setId(id);
       throw new BadJobFault_Exception("Invalid job id:", bjf);

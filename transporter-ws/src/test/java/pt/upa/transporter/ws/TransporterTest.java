@@ -9,6 +9,8 @@ import java.util.List;
 import pt.upa.transporter.ws.*;
 import pt.upa.transporter.ws.cli.*;
 import pt.upa.transporter.*;
+
+import java.lang.Thread;
 /**
  *  Unit Test example
  *  
@@ -23,24 +25,16 @@ public class TransporterTest {
   // one-time initialization and clean-up
 
   @BeforeClass
-  public static void oneTimeSetUp() {
-    try {
-      _transporter = new TransporterPort("UpaTransporter9");
-      _transporter_odd = new TransporterPort("UpaTransporter1");
-      _transporter_even = new TransporterPort("UpaTransporter2");
-    } catch(Exception e){
-      System.out.println(e.getMessage());
-    }
+  public static void oneTimeSetUp() throws Exception {
+    _transporter = new TransporterPort("UpaTransporter9");
+    _transporter_odd = new TransporterPort("UpaTransporter1");
+    _transporter_even = new TransporterPort("UpaTransporter2");
   }
 
   @AfterClass
-  public static void oneTimeTearDown() {
-    try { 
-      _transporter_odd = null;
-      _transporter_even = null;
-    }catch(Exception e ){
-      System.out.println(e.getMessage());
-    }
+  public static void oneTimeTearDown() throws Exception {
+    _transporter_odd = null;
+    _transporter_even = null;
   }
 
 
@@ -50,12 +44,12 @@ public class TransporterTest {
   // initialization and clean-up for each test
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
 
   }
 
   @After
-  public void tearDown() {
+  public void tearDown() throws Exception {
     _transporter_odd.clearJobs();
     _transporter_even.clearJobs();
     _transporter.clearJobs();
@@ -65,187 +59,268 @@ public class TransporterTest {
   // tests
 
   @Test
-  public void testPrice() {
-    try {
-      int price = 101;
-      String origin = "Leiria";
-      String destination ="Lisboa";
+  public void testPrice101() throws Exception {
+    int price = 101;
+    String origin = "Leiria";
+    String destination ="Lisboa";
 
-      System.out.println("[TEST] Testing price conditions for even and odd transporters");
-      System.out.println("[TEST] price = 101");
-      assertEquals(_transporter_odd.requestJob(origin,destination,price), null);
-      assertEquals(_transporter_even.requestJob(origin,destination,price), null);
-
-      System.out.println("[TEST] price = 100");
-      price = 100;
-      assertTrue(_transporter_odd.requestJob(origin,destination,price).getJobPrice() > price);
-      assertTrue(_transporter_even.requestJob(origin,destination,price).getJobPrice() < price);
-
-      System.out.println("[TEST] price = 99");
-      price=99;
-      assertTrue(_transporter_odd.requestJob(origin,destination,price).getJobPrice() < price);
-      assertTrue(_transporter_even.requestJob(origin,destination,price).getJobPrice() > price);
-
-      System.out.println("[TEST] price = 9");
-      price=9;
-      assertTrue(_transporter_odd.requestJob(origin,destination,price).getJobPrice() < price);
-      assertTrue(_transporter_even.requestJob(origin,destination,price).getJobPrice() < price);
-
-      System.out.println("[TEST] price = 0");
-      price=0;
-      assertEquals(_transporter_odd.requestJob(origin,destination,price).getJobPrice(), 0);
-      assertEquals(_transporter_even.requestJob(origin,destination,price).getJobPrice(), 0);
-
-      System.out.println("[TEST] Price tests completed successfuly");
-    }catch(Exception e){
-      fail("Failed test because of exception: " + e.getMessage());
-    }
+    System.out.println("[TEST] Testing price conditions for even and odd transporters");
+    System.out.println("[TEST] price = 101");
+    assertEquals(_transporter_odd.requestJob(origin,destination,price), null);
+    assertEquals(_transporter_even.requestJob(origin,destination,price), null);
   }
 
   @Test
-  public void testLocation() {
-    try{
-      int price = 50;
-      String origin = "Leiria";
-      String destination ="Lisboa";
-      JobView jv_odd, jv_even;
+  public void testPrice100() throws Exception {
+    int price = 100;
+    String origin = "Leiria";
+    String destination ="Lisboa";
 
-      System.out.println("[TEST] Testing location conditions for even and odd transporters");
-
-      System.out.println("[TEST] Leiria->Lisboa");
-      jv_odd = _transporter_odd.requestJob(origin,destination,price); 
-      jv_even = _transporter_even.requestJob(origin,destination,price);
-      assertEquals(jv_odd.getJobOrigin(), "Leiria");
-      assertEquals(jv_odd.getJobDestination(), "Lisboa");
-      assertEquals(jv_even.getJobOrigin(), "Leiria");
-      assertEquals(jv_even.getJobDestination(), "Lisboa");
-
-      System.out.println("[TEST] Porto->Lisboa"); 
-      origin = "Porto";
-      destination = "Lisboa";
-      jv_odd = _transporter_odd.requestJob(origin,destination,price); 
-      jv_even = _transporter_even.requestJob(origin,destination,price);
-      assertEquals(jv_odd, null);
-      assertEquals(jv_even.getJobOrigin(), "Porto");
-      assertEquals(jv_even.getJobDestination(), "Lisboa");
-
-      System.out.println("[TEST] Portalegre->Leiria");
-      origin = "Portalegre";
-      destination = "Leiria";
-      jv_odd = _transporter_odd.requestJob(origin,destination,price); 
-      jv_even = _transporter_even.requestJob(origin,destination,price);
-      assertEquals(jv_odd.getJobOrigin(), "Portalegre");
-      assertEquals(jv_odd.getJobDestination(), "Leiria");
-      assertEquals(jv_even, null);
-
-      System.out.println("[TEST] Porto->Bragança");
-      origin = "Porto";
-      destination = "Braganca";
-      jv_odd = _transporter_odd.requestJob(origin,destination,price); 
-      jv_even = _transporter_even.requestJob(origin,destination,price);
-      assertEquals(jv_odd, null);
-      assertEquals(jv_even.getJobOrigin(), "Porto");
-      assertEquals(jv_even.getJobDestination(), "Braganca");
-
-      System.out.println("[TEST] Portalegre -> Faro");
-      origin= "Portalegre";
-      destination = "Faro";
-      jv_odd = _transporter_odd.requestJob(origin,destination,price); 
-      jv_even = _transporter_even.requestJob(origin,destination,price);
-      assertEquals(jv_odd.getJobOrigin(), "Portalegre");
-      assertEquals(jv_odd.getJobDestination(), "Faro");
-      assertEquals(jv_even, null);
-
-      System.out.println("[TEST] Location tests completed successfuly");
-    }catch(Exception e){
-      fail("Failed test because of exception: " + e.getMessage());
-    }
+    System.out.println("[TEST] price = 100");
+    assertTrue(_transporter_odd.requestJob(origin,destination,price).getJobPrice() > price);
+    assertTrue(_transporter_even.requestJob(origin,destination,price).getJobPrice() < price);
   }
 
   @Test
-  public void testDecideJob(){
+  public void testPrice99() throws Exception {
+    int price = 99;
+    String origin = "Leiria";
+    String destination ="Lisboa";
+
+    System.out.println("[TEST] price = 99");
+    assertTrue(_transporter_odd.requestJob(origin,destination,price).getJobPrice() < price);
+    assertTrue(_transporter_even.requestJob(origin,destination,price).getJobPrice() > price);
+  }
+  
+  @Test
+  public void testPrice11() throws Exception {
+    int price = 11;
+    String origin = "Leiria";
+    String destination ="Lisboa";
+
+    System.out.println("[TEST] price = 11");
+    assertTrue(_transporter_odd.requestJob(origin,destination,price).getJobPrice() < price);
+    assertTrue(_transporter_even.requestJob(origin,destination,price).getJobPrice() > price);
+  }
+
+  @Test
+  public void testPrice10() throws Exception {
+    int price = 10;
+    String origin = "Leiria";
+    String destination ="Lisboa";
+
+    System.out.println("[TEST] price = 10");
+    assertTrue(_transporter_odd.requestJob(origin,destination,price).getJobPrice() < price);
+    assertTrue(_transporter_even.requestJob(origin,destination,price).getJobPrice() < price);
+  } 
+
+  @Test
+  public void testPrice0() throws Exception {
+    int price = 0;
+    String origin = "Leiria";
+    String destination ="Lisboa";
+
+    System.out.println("[TEST] price = 0");
+    assertEquals(_transporter_odd.requestJob(origin,destination,price).getJobPrice(), 0);
+    assertEquals(_transporter_even.requestJob(origin,destination,price).getJobPrice(), 0);
+  }
+
+
+  @Test
+  public void testLocationCenterCenter() throws Exception {
+    int price = 50;
+    String origin = "Leiria";
+    String destination ="Lisboa";
+    JobView jv_odd, jv_even;
+
+    System.out.println("[TEST] CENTRO->CENTRO");
+    jv_odd = _transporter_odd.requestJob(origin,destination,price); 
+    jv_even = _transporter_even.requestJob(origin,destination,price);
+    assertEquals(jv_odd.getJobOrigin(), "Leiria");
+    assertEquals(jv_odd.getJobDestination(), "Lisboa");
+    assertEquals(jv_even.getJobOrigin(), "Leiria");
+    assertEquals(jv_even.getJobDestination(), "Lisboa");
+  }
+
+  @Test
+  public void testLocationNorthCenter() throws Exception {
+    int price = 50;
+    String origin = "Porto";
+    String destination = "Lisboa";
+    JobView jv_odd, jv_even;
+
+    System.out.println("[TEST] NORTE->CENTRO"); 
+    jv_odd = _transporter_odd.requestJob(origin,destination,price); 
+    jv_even = _transporter_even.requestJob(origin,destination,price);
+    assertEquals(jv_odd, null);
+    assertEquals(jv_even.getJobOrigin(), "Porto");
+    assertEquals(jv_even.getJobDestination(), "Lisboa");
+  }
+  
+  @Test
+  public void testLocationSouthCenter() throws Exception {
+    int price = 50;
+    String origin = "Portalegre";
+    String destination = "Leiria";
+    JobView jv_odd, jv_even;
+
+    System.out.println("[TEST] SUL->CENTRO");
+    jv_odd = _transporter_odd.requestJob(origin,destination,price); 
+    jv_even = _transporter_even.requestJob(origin,destination,price);
+    assertEquals(jv_odd.getJobOrigin(), "Portalegre");
+    assertEquals(jv_odd.getJobDestination(), "Leiria");
+    assertEquals(jv_even, null);
+
+  }
+
+  @Test
+  public void testLocationNorthNorth() throws Exception {
+    int price = 50;
+    String origin = "Porto";
+    String destination = "Braganca";
+    JobView jv_odd, jv_even;
+
+    System.out.println("[TEST] NORTE->NORTE"); 
+    jv_odd = _transporter_odd.requestJob(origin,destination,price); 
+    jv_even = _transporter_even.requestJob(origin,destination,price);
+    assertEquals(jv_odd, null);
+    assertEquals(jv_even.getJobOrigin(), "Porto");
+    assertEquals(jv_even.getJobDestination(), "Braganca");
+  }
+
+  @Test
+  public void testLocationSouthSouth() throws Exception {
+    int price = 50;
+    String origin = "Portalegre";
+    String destination = "Faro";
+    JobView jv_odd, jv_even;
+
+    System.out.println("[TEST] SUL -> SUL");
+    jv_odd = _transporter_odd.requestJob(origin,destination,price); 
+    jv_even = _transporter_even.requestJob(origin,destination,price);
+    assertEquals(jv_odd.getJobOrigin(), "Portalegre");
+    assertEquals(jv_odd.getJobDestination(), "Faro");
+    assertEquals(jv_even, null);
+
+  }
+  
+  @Test
+  public void testDecideJobTrue() throws Exception {
     System.out.println("[TEST] Testing decideJob()");
-    try{
-      JobView jv = _transporter.requestJob("Leiria", "Lisboa", 50); 
-      String id = jv.getJobIdentifier();
-      jv = _transporter.decideJob(id, true);
-      assertEquals(jv.getJobState(), JobStateView.ACCEPTED); 
-
-      jv = _transporter.requestJob("Coimbra", "Lisboa", 50); 
-      id = jv.getJobIdentifier();
-      jv = _transporter.decideJob(id, false);
-      assertEquals(jv.getJobState(), JobStateView.REJECTED);
-    }catch(Exception e){
-      fail("Failed test because of exception: " + e.getMessage());
-    }
-  }
-   
-  @Test(expected = BadJobFault_Exception.class)
-  public void testDecideJobTrueException() throws Exception {
-    _transporter.decideJob("FAKEID", true);
-  }
-
-  @Test(expected = BadJobFault_Exception.class)
-  public void testDecideJobFalseException() throws Exception {
-    _transporter.decideJob("FAKEID", false);
+    JobView jv = _transporter.requestJob("Leiria", "Lisboa", 50); 
+    String id = jv.getJobIdentifier();
+    jv = _transporter.decideJob(id, true);
+    assertEquals(jv.getJobState(), JobStateView.ACCEPTED); 
   }
 
   @Test
-  public void testJobStatus(){
-    System.out.println("[TEST] Testing jobStatus()");
-    try{
+  public void testDecideJobFalse() throws Exception {
+    System.out.println("[TEST] Testing decideJob()");
+    JobView jv = _transporter.requestJob("Leiria", "Lisboa", 50); 
+    String id = jv.getJobIdentifier();
+    jv = _transporter.decideJob(id, false);
+    assertEquals(jv.getJobState(), JobStateView.REJECTED); 
+  }
+
+  @Test(expected = BadJobFault_Exception.class)
+    public void testDecideJobTrueException() throws Exception {
+      _transporter.decideJob("FAKEID", true);
+    }
+
+  @Test(expected = BadJobFault_Exception.class)
+    public void testDecideJobFalseException() throws Exception {
+      _transporter.decideJob("FAKEID", false);
+    }
+
+  @Test(expected = BadJobFault_Exception.class)
+    public void testDecideJobNotProposedException() throws Exception {    
       JobView jv = _transporter.requestJob("Leiria", "Lisboa", 50);
       String id = jv.getJobIdentifier();
-      JobView jv_response = _transporter.jobStatus(id);
-      assertEquals(jv_response.getJobState(), JobStateView.PROPOSED);
-
       _transporter.decideJob(id, true);
-      jv_response = _transporter.jobStatus(id);
-
-      assertEquals(jv_response.getJobState(), JobStateView.ACCEPTED);
-      
-      jv_response = _transporter.jobStatus("FAKEID"); 
-      assertNull(jv_response);
-
-    }catch(Exception e){
-      fail("Failed test because of exception: " + e.getMessage());
+      _transporter.decideJob(id, true);
     }
+
+  @Test
+  public void testJobStatus() throws Exception {
+    System.out.println("[TEST] Testing jobStatus()");
+    JobView jv = _transporter.requestJob("Leiria", "Lisboa", 50);
+    String id = jv.getJobIdentifier();
+    JobView jv_response = _transporter.jobStatus(id);
+    assertEquals(jv_response.getJobState(), JobStateView.PROPOSED);
+
+    _transporter.decideJob(id, true);
+    jv_response = _transporter.jobStatus(id);
+
+    assertEquals(jv_response.getJobState(), JobStateView.ACCEPTED);
+
+    jv_response = _transporter.jobStatus("FAKEID"); 
+    assertNull(jv_response);
   }
 
   @Test
-  public void testListJobs(){
-    try{
-      _transporter.requestJob("Leiria", "Lisboa", 50);
-      _transporter.requestJob("Lisboa", "Coimbra", 10);
-      _transporter.requestJob("Coimbra", "Leiria", 5);
-      List<JobView> jobs = _transporter.listJobs();
-      assertEquals(jobs.size(), 3);
-    }catch(Exception e){
-      fail("Failed test because of exception: " + e.getMessage());
-    }
+  public void testListJobs() throws Exception {
+    _transporter.requestJob("Leiria", "Lisboa", 50);
+    _transporter.requestJob("Lisboa", "Coimbra", 10);
+    _transporter.requestJob("Coimbra", "Leiria", 5);
+    List<JobView> jobs = _transporter.listJobs();
+    assertEquals(jobs.size(), 3);
   }
 
   @Test 
-  public void testClearJobs(){
-    try{
-      _transporter.requestJob("Leiria", "Lisboa", 50);
-      _transporter.requestJob("Leiria", "Coimbra", 50);
-      _transporter.requestJob("Coimbra", "Lisboa", 50);
-      _transporter.clearJobs();
-      List<JobView> jobs = _transporter.listJobs();
-      assertEquals(jobs.size(), 0);
-    }catch(Exception e){
-      fail("Failed test because of exception: " + e.getMessage());
-    }
+  public void testClearJobs() throws Exception {
+    _transporter.requestJob("Leiria", "Lisboa", 50);
+    _transporter.requestJob("Leiria", "Coimbra", 50);
+    _transporter.requestJob("Coimbra", "Lisboa", 50);
+    _transporter.clearJobs();
+    List<JobView> jobs = _transporter.listJobs();
+    assertEquals(jobs.size(), 0);
   }
 
   @Test
-  public void testJobSimulation(){
-    try{
+  public void testJobSimulation() throws Exception {
+    System.out.println("[TEST] Testing job Simulation()");
+    JobView jv = _transporter.requestJob("Leiria", "Lisboa", 50);
+    String id = jv.getJobIdentifier();
 
-    }catch(Exception e){
-      fail("Failed test because of exception: " + e.getMessage());
+    JobView response;
+    _transporter.decideJob(id, true);
+    int accum = 0, timer=500;
+    
+    while(accum <= 5000){
+      Thread.sleep(timer);      
+      accum += timer;
+      response = _transporter.jobStatus(id); 
+      if(response.getJobState().equals(JobStateView.HEADING)) {
+        accum = 0;
+        break;
+      }
     }
+    if(accum != 0.0) fail("Job didn't change to HEADING");
+    
+    while(accum <= 5000){
+      Thread.sleep(timer);      
+      accum += timer;
+      response = _transporter.jobStatus(id); 
+      if(response.getJobState().equals(JobStateView.ONGOING)) {
+        accum = 0;
+        break;
+      }
+    }
+    if(accum != 0) fail("Job didn't change to ONGOING");
+    
+    while(accum <= 5000){
+      Thread.sleep(timer);      
+      accum += timer;
+      response = _transporter.jobStatus(id); 
+      if(response.getJobState().equals(JobStateView.COMPLETED)) {
+        accum = 0;
+        break;
+      }
+    }
+    if(accum != 0) fail("Job didn't change to ONGOING");
+
+    System.out.println("[TEST] Completed job simulation test");
+    
   }
 
   @Test(expected = BadLocationFault_Exception.class)
