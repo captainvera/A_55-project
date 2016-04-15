@@ -22,64 +22,69 @@ Repositório:
 
 [0] Iniciar sistema operativo
 
-Indicar Windows ou Linux
-*(escolher um dos dois, que esteja disponível nos laboratórios, e depois apagar esta linha)*
-
+> O sistema operativo usado como ambiente de desenvolvimento foi Windows
 
 [1] Iniciar servidores de apoio
 
 JUDDI:
-```
-...
-```
-
-
-[2] Criar pasta temporária
 
 ```
-cd ...
-mkdir ...
+> O servidor JUDDI deve ser inicializado correndo o ficheiro que se encontra na pasta respetiva da instalacao do JUDDI (tomcat)
+     - bin\startup.bat
+  que inicializara o servidor de nomes UDDI
+
 ```
 
 
-[3] Obter código fonte do projeto (versão entregue)
+[2] Criar pasta temporária (pasta exemplo) 
 
 ```
-git clone ... 
-```
-*(colocar aqui comandos git para obter a versão entregue a partir da tag e depois apagar esta linha)*
+cd ~/dev 
+mkdir proj-sd-55 
 
+```
+
+[3] Obter código fonte do projeto (versão entregue) a partir da tag de entrega 
+
+```
+cd proj-sd-55
+git clone -b SD_R1 https://github.com/tecnico-distsys/A_55-project  
+
+cd A_55-project
+
+```
 
 [4] Instalar módulos de bibliotecas auxiliares
 
 ```
+
 cd uddi-naming
 mvn clean install
-```
 
 ```
-cd ...
-mvn clean install
-```
-
 
 -------------------------------------------------------------------------------
 
 ### Serviço TRANSPORTER
 
-[1] Construir e executar **servidor**
+[1] Construir o servidor Transporter e executar duas instancias do Transporter de forma a permitir os testes do client
 
 ```
-cd ...-ws
+cd  transporter-ws
 mvn clean install
-mvn exec:java
+
+mvn exec:java -Dws.i=1
+mvn exec:java -Dws.i=2
+
 ```
 
-[2] Construir **cliente** e executar testes
+[2] Construir cliente Transporter e executar testes
 
 ```
-cd ...-ws-cli
+
+cd transporter-ws-cli
 mvn clean install
+
 ```
 
 ...
@@ -89,23 +94,26 @@ mvn clean install
 
 ### Serviço BROKER
 
-[1] Construir e executar **servidor**
+[1] Construir e executar o servidor Broker para permitir os testes de integracao
 
 ```
-cd ...-ws
+cd broker-ws
 mvn clean install
 mvn exec:java
-```
-
-
-[2] Construir **cliente** e executar testes
 
 ```
-cd ...-ws-cli
+
+
+[2] Construir cliente do Broker e executar testes
+
+```
+cd transporter-ws
+mvn exec:java -Dws.i=1
+mvn exec:java -Dws.i=2
+
+cd ../broker-ws-cli
 mvn clean install
-```
 
-...
+```
 
 -------------------------------------------------------------------------------
-**FIM**
