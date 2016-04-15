@@ -27,7 +27,7 @@ public class TransporterClientApplication {
         System.out.println("A transportadora nao trabalha neste dominio.");
       }
       System.out.printf("[REQUEST] Pousos->Leiria for 80%n");
-      JobView jv2 = tc.requestJob("Pousos", "Leiria", 80);
+      JobView jv2 = tc.requestJob("Lisboa", "Leiria", 80);
       System.out.printf("[RESPONSE] ID: %s | Price:  %d%n", jv2.getJobIdentifier(), jv2.getJobPrice());
       System.out.printf("[REQUEST] List all jobs");
       List<JobView> jobs = tc.listJobs();
