@@ -9,6 +9,9 @@ public class TransporterClientApplication {
   public static void main(String[] args) throws Exception {
     System.out.println(TransporterClientApplication.class.getSimpleName() + " starting...");
 
+    /**
+     * Very basic example execution for a TransporterClient
+     */
     TransporterClient tc = new TransporterClient();
     try{
       tc.connectToTransporter("UpaTransporter1");
@@ -24,9 +27,10 @@ public class TransporterClientApplication {
         jv = tc.jobStatus(jv.getJobIdentifier());
         System.out.printf("[RESPONSE] %s state is %s%n", jv.getJobIdentifier(), jv.getJobState().value());
       }else{
-        System.out.println("A transportadora nao trabalha neste dominio.");
+        System.out.println("A transportadora nao trabalha nesta zona.");
       }
-      System.out.printf("[REQUEST] Pousos->Leiria for 80%n");
+
+      System.out.printf("[REQUEST] Lisboa->Leiria for 80%n");
       JobView jv2 = tc.requestJob("Lisboa", "Leiria", 80);
       System.out.printf("[RESPONSE] ID: %s | Price:  %d%n", jv2.getJobIdentifier(), jv2.getJobPrice());
       System.out.printf("[REQUEST] List all jobs");
