@@ -81,8 +81,14 @@ public class BrokerClientTestIT {
 
     @Test(expected=UnavailableTransportFault_Exception.class)
     public void testUnavailableTransportBecausePrice() throws Exception{
-      System.out.println("[TEST] Unavailable Transport ");
+      System.out.println("[TEST] Unavailable Transport Price");
       client.requestTransport("Beja", "Lisboa", 101);
+    }
+
+    @Test(expected=UnavailableTransportPriceFault_Exception.class)
+    public void testUnavalaiblePrice() throws Exception{
+      System.out.println("[TEST] Price High ");
+      client.requestTransport("Porto", "Lisboa", 21);
     }
 
     @Test
