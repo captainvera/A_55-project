@@ -77,7 +77,7 @@ public class BrokerPort implements BrokerPortType{
     }
 
     public String value() {
-        return name();
+      return name();
     }
 
     public static Location fromValue(String v) {
@@ -91,35 +91,36 @@ public class BrokerPort implements BrokerPortType{
   }
 
 	TreeMap<String, TransporterClient> transporters = new TreeMap<String, TransporterClient>();
-	ArrayList<TransportView> _transports = new ArrayList<TransportView>();
+	ArrayList<Transport> _transports = new ArrayList<Transport>();
 	int _idCounter;
 
-	public BrokerPort() throws Exception{
-		System.out.println("Broker Initalized.");
-		connectToTransporters();
-	}
 
-	private void connectToTransporters() throws JAXRException{
-		System.out.println("Checking for Transporters.");
+  public BrokerPort() throws Exception{
+    System.out.println("Broker Initalized.");
+    connectToTransporters();
+  }
 
-		String uURL = "http://localhost:9090";
-		UDDINaming uddiNaming = new UDDINaming(uURL);
-		Collection<String> endpoints = uddiNaming.list("UpaTransporter%");
-		System.out.println("Creating clients to connect to " + endpoints.size() + " Transporters");
-		createTransporterClients(endpoints);
+  private void connectToTransporters() throws JAXRException{
+    System.out.println("Checking for Transporters.");
 
-	}
+    String uURL = "http://localhost:9090";
+    UDDINaming uddiNaming = new UDDINaming(uURL);
+    Collection<String> endpoints = uddiNaming.list("UpaTransporter%");
+    System.out.println("Creating clients to connect to " + endpoints.size() + " Transporters");
+    createTransporterClients(endpoints);
 
-	private void createTransporterClients( Collection<String> endpoints) throws JAXRException{
-		String name;
-		for (String endp : endpoints) {
-			TransporterClient client = new TransporterClient();
+  }
+
+  private void createTransporterClients( Collection<String> endpoints) throws JAXRException{
+    String name;
+    for (String endp : endpoints) {
+      TransporterClient client = new TransporterClient();
       try{
-			     client.connectToTransporterByURI(endp);
-       } catch(Exception e){e.printStackTrace();}
-			name = client.ping();
-			transporters.put(name,client);
-			System.out.println("Transporter: " + name + " was added to broker");
+        client.connectToTransporterByURI(endp);
+        name = client.ping();
+        transporters.put(name,client);
+        System.out.println("Transporter: " + name + " was added to broker");
+        } catch(Exception e){e.printStackTrace();}
 		}
 
 	}
@@ -133,8 +134,8 @@ public class BrokerPort implements BrokerPortType{
 		return "Contact has been established with " + transporters.size() + " Transporters.\n";
 	}
 
-	protected TransportView getTransportViewById(String id){
-		for(TransportView t : _transports){
+	protected Transport getTransportById(String id){
+		for(Transport t : _transports){
 			if(t.getId().equals(id)){
 				return t;
 			}
@@ -144,16 +145,12 @@ public class BrokerPort implements BrokerPortType{
 
 
 	public TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
-		TransportView tv = getTransportViewById(id);
+		Transport tv = getTransportById(id);
 		if(tv == null){
       UnknownTransportFault utf = new UnknownTransportFault();
       utf.setId(id);
       throw new UnknownTransportFault_Exception("Transport with " + id + " not found", utf);
     }
-
-		/*
-		* O id do transport é igual ao do job ???
-		*/
 		String name = tv.getTransporterCompany();
 		TransporterClient tpt = transporters.get(name);
 		JobStateView state = tpt.jobStatus(id).getJobState();
@@ -174,7 +171,7 @@ public class BrokerPort implements BrokerPortType{
 			break;
 		}
 
-		return tv;
+		return tv.toTransportView();
 	}
 
 	public void clearTransports(){
@@ -189,70 +186,72 @@ public class BrokerPort implements BrokerPortType{
 	}
 
 	public List<TransportView> listTransports(){
-
-		return new ArrayList<TransportView>(_transports);
-
+    ArrayList<TransportView> _tviews = new ArrayList<TransportView>();
+    for(Transport t : _transports){
+      _tviews.add(t.toTransportView());
+    }
+    return _tviews;
 	}
 
-	public void checkBestTransporter (ArrayList<JobView> jobs, TransportView transport){
+	public void checkBestTransporter (ArrayList<JobView> jobs, Transport transport){
 		int min = 101;
 		JobView bestJob = null;
-
     for(JobView job : jobs){
-		  if(job.getJobPrice() < min){
-		      transport.setTransporterCompany(job.getCompanyName());
-          transport.setPrice(job.getJobPrice());
-          transport.setId(job.getJobIdentifier());
-          min = job.getJobPrice();
+      if(job.getJobPrice() < min){
+        transport.setTransporterCompany(job.getCompanyName());
+        transport.setPrice(job.getJobPrice());
+        transport.setId(job.getJobIdentifier());
+        min = job.getJobPrice();
       }
     }
-	}
+  }
 
-	public void confirmJob(ArrayList<JobView> jobs, TransportView transport){
+	public void confirmJob(ArrayList<JobView> jobs, Transport transport){
 		for (JobView job : jobs){
 			try{
 				if (transport.getTransporterCompany().equals(job.getCompanyName()))
 				transporters.get(job.getCompanyName()).decideJob(job.getJobIdentifier(), true);
 
-				else transporters.get(job.getCompanyName()).decideJob(job.getJobIdentifier(), false);
+        else transporters.get(job.getCompanyName()).decideJob(job.getJobIdentifier(), false);
 
-			} catch (BadJobFault_Exception e){
+      } catch (BadJobFault_Exception e){
         e.printStackTrace();
       }
-		}
-	}
+    }
+  }
 
-	public void rejectAllOptions (ArrayList<JobView> jobs){
-		for (JobView job : jobs){
-			try{
-				transporters.get(job.getCompanyName()).decideJob(job.getJobIdentifier(), false);
-			} catch (BadJobFault_Exception e){
+  public void rejectAllOptions (ArrayList<JobView> jobs){
+    for (JobView job : jobs){
+      try{
+        transporters.get(job.getCompanyName()).decideJob(job.getJobIdentifier(), false);
+      } catch (BadJobFault_Exception e){
         e.printStackTrace();
       }
-		}
-	}
+    }
+  }
 
   public ArrayList<JobView> makeRequests(String origin, String destination, int price)
-  throws InvalidPriceFault_Exception, UnknownLocationFault_Exception{
+    throws InvalidPriceFault_Exception, UnknownLocationFault_Exception{
     ArrayList<JobView> _jobs = new ArrayList<JobView>();
     for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
-			try{
-				JobView proposedJob = entry.getValue().requestJob(origin, destination, price);
-				if (proposedJob != null) _jobs.add(proposedJob);
-			}
+      try{
+        JobView proposedJob = entry.getValue().requestJob(origin, destination, price);
+        if (proposedJob != null) _jobs.add(proposedJob);
+      }
       catch (BadLocationFault_Exception e) {
         UnknownLocationFault ulf = new UnknownLocationFault();
         ulf.setLocation(e.getFaultInfo().getLocation());
         throw new UnknownLocationFault_Exception("Invalid location:", ulf);
-			}
+      }
       catch (BadPriceFault_Exception e) {
         InvalidPriceFault ipf = new InvalidPriceFault();
         ipf.setPrice(e.getFaultInfo().getPrice());
         throw new InvalidPriceFault_Exception("Invalid price:", ipf);
       }
-		}
+    }
     return _jobs;
   }
+
 
 	public String requestTransport(String origin, String destination, int priceMax)
 	throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
@@ -283,10 +282,7 @@ public class BrokerPort implements BrokerPortType{
       throw new InvalidPriceFault_Exception("Invalid price:", ipf);
     }
 
-		TransportView newTransport = new TransportView();
-		newTransport.setOrigin(origin);
-		newTransport.setDestination(destination);
-		newTransport.setState(TransportStateView.REQUESTED);
+		Transport newTransport = new Transport(origin, destination, priceMax, TransportStateView.REQUESTED);
 
     ArrayList<JobView> _jobs = makeRequests(origin, destination, priceMax);
 
@@ -317,5 +313,6 @@ public class BrokerPort implements BrokerPortType{
 		_transports.add(newTransport);
 		return newTransport.getId();
 	}
+
 
 }
