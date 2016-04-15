@@ -4,6 +4,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,8 +19,8 @@ import pt.upa.transporter.ws.cli.TransporterClient;
 
 public class BrokerUnitTest{
 
-	final static JobView jv1 = new JobView();
-	final static JobView jv2 = new JobView();
+	static JobView jv1 = new JobView();
+	static JobView jv2 = new JobView();
 	static BrokerPort broker;
 	static ArrayList<String> _endpoints = new ArrayList<String>();
 	@Mocked UDDINaming uddi;
@@ -31,9 +32,9 @@ public class BrokerUnitTest{
 		jv1.setCompanyName("UpaTransporter1");
 		String identifier = "Lisboa" + "T" + "Leiria" + "ID" + "1";
 		jv1.setJobIdentifier(identifier);
-		jv1.setJobOrigin("Lisboa");
-		jv1.setJobDestination("Leiria");
-		jv1.setJobPrice(10);
+		jv1.setJobOrigin("Leiria");
+		jv1.setJobDestination("Lisboa");
+		jv1.setJobPrice(50);
 		jv1.setJobState(JobStateView.PROPOSED);
 
 		jv2.setCompanyName("UpaTransporter1");
@@ -78,9 +79,57 @@ public class BrokerUnitTest{
 	public void tearDown() {
 	}
 
+	public void populate() throws Exception{
+		System.out.println("[TEST] Price too high ");
+		new NonStrictExpectations() {{
+			new UDDINaming(anyString);
+
+			uddi.list("UpaTransporter%"); 
+			result = _endpoints;
+
+			new TransporterClient();
+
+			client.connectToTransporterByURI(anyString);
+			client.ping();
+			result = "UpaTransporter1";
+			client.requestJob("Leiria", "Lisboa", 50);
+			result = jv1;
+			client.decideJob(anyString, true);
+		}};
+
+		broker.requestTransport("Leiria", "Lisboa", 50);
+		broker.requestTransport("Leiria", "Lisboa", 50);
+		broker.requestTransport("Leiria", "Lisboa", 50);
+
+		
+	}
+	
 	@Test
-	public void testtemp(){
-		System.out.println("[TEST] notest ");
+	public void testsuccess() throws Exception{
+		new StrictExpectations() {{
+			new UDDINaming(anyString);
+
+			uddi.list("UpaTransporter%"); 
+			result = _endpoints;
+
+			new TransporterClient();
+
+			client.connectToTransporterByURI(anyString);
+			client.ping();
+			result = "UpaTransporter1";
+			client.requestJob("Leiria", "Lisboa", 50);
+			result = jv1;
+			client.decideJob("Lisboa" + "T" + "Leiria" + "ID" + "1", true);
+			result = jv1;
+			client.jobStatus("Lisboa" + "T" + "Leiria" + "ID" + "1");
+			result = jv1;
+		}};
+		
+		String identifier = broker.requestTransport("Leiria", "Lisboa", 50);
+		TransportView transport = broker.viewTransport(identifier);
+    assertEquals(transport.getOrigin(), "Leiria");
+    assertEquals(transport.getDestination(), "Lisboa");
+    assertEquals(transport.getState(), TransportStateView.BOOKED);
 
 	}
 
@@ -106,8 +155,8 @@ public class BrokerUnitTest{
 	}
 
 	@Test(expected=UnknownLocationFault_Exception.class)
-	public void testInvalidLocation() throws Exception{
-		System.out.println("[TEST] Invalid Location ");
+	public void testUnknownOrigin() throws Exception{
+		System.out.println("[TEST] Unknown Origin");
 		new StrictExpectations() {{
 			new UDDINaming(anyString);
 
@@ -123,10 +172,46 @@ public class BrokerUnitTest{
 		broker.requestTransport("Munique", "Lisboa", 10);
 	}
 
+	@Test(expected=UnknownLocationFault_Exception.class)
+	public void testUnknownDestination() throws Exception{
+		System.out.println("[TEST] Unknown Destination ");
+		new StrictExpectations() {{
+			new UDDINaming(anyString);
+
+			uddi.list("UpaTransporter%"); 
+			result = _endpoints;
+
+			new TransporterClient();
+
+			client.connectToTransporterByURI(anyString);
+			client.ping();
+			result = "UpaTransporter1";
+		}};
+		broker.requestTransport("Lisboa", "Munique", 10);
+	}
+
 	@Test(expected=UnavailableTransportFault_Exception.class)
 	public void testUnavailableTransport() throws Exception{
 		System.out.println("[TEST] Unavailable Transport ");
-		new NonStrictExpectations() {{
+		new StrictExpectations() {{
+			new UDDINaming(anyString);
+  		uddi.list("UpaTransporter%"); 
+  		result = _endpoints;
+  		new TransporterClient();
+  		client.connectToTransporterByURI(anyString);
+  		client.ping();
+  		result = "UpaTransporter1";
+  		
+			client.requestJob("Beja", "Porto", 10);
+			result = new UnavailableTransportFault_Exception("Fabrication", null);
+		}};
+		broker.requestTransport("Beja", "Porto", 10);
+	}
+	
+	@Test(expected=UnavailableTransportFault_Exception.class)
+  public void testPriceTooHigh() throws Exception{
+    System.out.println("[TEST] Price too high ");
+    new StrictExpectations() {{
 			new UDDINaming(anyString);
   		
   		uddi.list("UpaTransporter%"); 
@@ -137,12 +222,31 @@ public class BrokerUnitTest{
   		client.connectToTransporterByURI(anyString);
   		client.ping();
   		result = "UpaTransporter1";
-			client.requestJob("Beja", "Porto", 10);
-			result = new UnavailableTransportFault_Exception("Fabrication", null);
+			client.requestJob("Beja", "Lisboa", 101);
+			result = null;
 		}};
-		broker.requestTransport("Beja", "Porto", 10);
-	}
+    broker.requestTransport("Beja", "Lisboa", 101);
+  }
   
+	@Test
+	public void testListJobs() throws Exception{
+
+		populate();
+		List<TransportView> transps = broker.listTransports();
+		assertEquals(transps.size(), 3);
+
+	}
+	
+	@Test
+	public void clearTransports(){
+		System.out.println("[TEST] Price too high ");
+		new StrictExpectations() {{
+			client.clearJobs();
+		}};
+
+		broker.clearTransports();
+
+	}
 
 
 }
