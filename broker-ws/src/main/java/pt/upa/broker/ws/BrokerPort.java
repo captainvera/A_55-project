@@ -11,6 +11,7 @@ import java.util.Collection;
 
 import javax.jws.WebService;
 import javax.xml.ws.BindingProvider;
+import javax.xml.registry.JAXRException;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import pt.upa.transporter.ws.*;
@@ -98,7 +99,7 @@ public class BrokerPort implements BrokerPortType{
 		connectToTransporters();
 	}
 
-	private void connectToTransporters() throws Exception{
+	private void connectToTransporters() throws JAXRException{
 		System.out.println("Checking for Transporters.");
 
 		String uURL = "http://localhost:9090";
@@ -109,11 +110,13 @@ public class BrokerPort implements BrokerPortType{
 
 	}
 
-	private void createTransporterClients( Collection<String> endpoints) throws Exception{
+	private void createTransporterClients( Collection<String> endpoints) throws JAXRException{
 		String name;
 		for (String endp : endpoints) {
 			TransporterClient client = new TransporterClient();
-			client.connectToTransporterByURI(endp);
+      try{
+			     client.connectToTransporterByURI(endp);
+       } catch(Exception e){e.printStackTrace();}
 			name = client.ping();
 			transporters.put(name,client);
 			System.out.println("Transporter: " + name + " was added to broker");
@@ -254,7 +257,10 @@ public class BrokerPort implements BrokerPortType{
 	public String requestTransport(String origin, String destination, int priceMax)
 	throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
 	UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception{
-
+    transporters.clear();
+    try{
+      connectToTransporters();
+    } catch(JAXRException e) {e.printStackTrace();}
 
     Location l_origin = Location.fromValue(origin);
     Location l_destination = Location.fromValue(destination);
