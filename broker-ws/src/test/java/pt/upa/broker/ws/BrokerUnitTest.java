@@ -230,7 +230,7 @@ public class BrokerUnitTest{
   
 	@Test
 	public void testListJobs() throws Exception{
-
+		System.out.println("[TEST] List Jobs ");
 		populate();
 		List<TransportView> transps = broker.listTransports();
 		assertEquals(transps.size(), 3);
@@ -239,7 +239,7 @@ public class BrokerUnitTest{
 	
 	@Test
 	public void clearTransports(){
-		System.out.println("[TEST] Price too high ");
+		System.out.println("[TEST] clear Transports ");
 		new StrictExpectations() {{
 			client.clearJobs();
 		}};
@@ -247,6 +247,7 @@ public class BrokerUnitTest{
 		broker.clearTransports();
 
 	}
+	
 
 
 }
