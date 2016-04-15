@@ -91,7 +91,7 @@ public class BrokerPort implements BrokerPortType{
   }
 
 	TreeMap<String, TransporterClient> transporters = new TreeMap<String, TransporterClient>();
-	ArrayList<TransportView> _transports = new ArrayList<TransportView>();
+	ArrayList<Transport> _transports = new ArrayList<Transport>();
 	int _idCounter;
 
 	public BrokerPort() throws Exception{
@@ -133,8 +133,8 @@ public class BrokerPort implements BrokerPortType{
 		return "Contact has been established with " + transporters.size() + " Transporters.\n";
 	}
 
-	protected TransportView getTransportViewById(String id){
-		for(TransportView t : _transports){
+	protected Transport getTransportById(String id){
+		for(Transport t : _transports){
 			if(t.getId().equals(id)){
 				return t;
 			}
@@ -144,7 +144,7 @@ public class BrokerPort implements BrokerPortType{
 
 
 	public TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
-		TransportView tv = getTransportViewById(id);
+		Transport tv = getTransportById(id);
 		if(tv == null){
       UnknownTransportFault utf = new UnknownTransportFault();
       utf.setId(id);
@@ -174,7 +174,7 @@ public class BrokerPort implements BrokerPortType{
 			break;
 		}
 
-		return tv;
+		return tv.toTransportView();
 	}
 
 	public void clearTransports(){
@@ -189,12 +189,14 @@ public class BrokerPort implements BrokerPortType{
 	}
 
 	public List<TransportView> listTransports(){
-
-		return new ArrayList<TransportView>(_transports);
-
+    ArrayList<TransportView> _tviews = new ArrayList<TransportView>();
+    for(Transport t : _transports){
+      _tviews.add(t.toTransportView());
+    }
+    return _tviews;
 	}
 
-	public void checkBestTransporter (ArrayList<JobView> jobs, TransportView transport){
+	public void checkBestTransporter (ArrayList<JobView> jobs, Transport transport){
 		int min = 101;
 		JobView bestJob = null;
 
@@ -208,7 +210,7 @@ public class BrokerPort implements BrokerPortType{
     }
 	}
 
-	public void confirmJob(ArrayList<JobView> jobs, TransportView transport){
+	public void confirmJob(ArrayList<JobView> jobs, Transport transport){
 		for (JobView job : jobs){
 			try{
 				if (transport.getTransporterCompany().equals(job.getCompanyName()))
@@ -283,10 +285,7 @@ public class BrokerPort implements BrokerPortType{
       throw new InvalidPriceFault_Exception("Invalid price:", ipf);
     }
 
-		TransportView newTransport = new TransportView();
-		newTransport.setOrigin(origin);
-		newTransport.setDestination(destination);
-		newTransport.setState(TransportStateView.REQUESTED);
+		Transport newTransport = new Transport(origin, destination, priceMax, TransportStateView.REQUESTED);
 
     ArrayList<JobView> _jobs = makeRequests(origin, destination, priceMax);
 
