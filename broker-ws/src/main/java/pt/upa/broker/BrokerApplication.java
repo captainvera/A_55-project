@@ -32,11 +32,6 @@ public class BrokerApplication {
 		uddiNaming = new UDDINaming(uddiURL);
 		uddiNaming.rebind(name, url);
 		
-		
-		
-		//TODO (erase comment print)
-		//being a nice good server
-		//waiting for connections
 		System.out.println("Waiting for connections");
 		System.out.println("Time is money, friend!");
 		System.in.read();
