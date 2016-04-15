@@ -253,9 +253,8 @@ public class BrokerPort implements BrokerPortType{
 
 	public String requestTransport(String origin, String destination, int priceMax)
 	throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
-	UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+	UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception{
 
-		String res = "";
 
     Location l_origin = Location.fromValue(origin);
     Location l_destination = Location.fromValue(destination);

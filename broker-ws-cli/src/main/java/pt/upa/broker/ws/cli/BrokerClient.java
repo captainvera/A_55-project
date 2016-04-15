@@ -54,15 +54,12 @@ public class BrokerClient {
 
 	}
 
-		public TransportView viewTransport(String id){
-			System.out.println("Retrieving transport with " + id);
-			TransportView response = null;
-			try{
-				response = broker.viewTransport(id);
-			} catch (UnknownTransportFault_Exception e) {System.out.println("UNKNOWN TRANSPORT EXCEPTION");}
-
-			return response;
-		}
+	public TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
+		System.out.println("Retrieving transport with " + id);
+		TransportView response = null;
+		response = broker.viewTransport(id);
+		return response;
+	}
 
 		public String requestTransport(String origin, String destination, int priceMax)
 		throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
