@@ -117,6 +117,9 @@ public class TransporterITTest {
       assertEquals(jv_odd.getJobState(), JobStateView.ACCEPTED);
       assertEquals(jv_even.getJobState(), JobStateView.ACCEPTED);
 
+      jv_odd = _client_odd.requestJob(origin,destination,price);
+      jv_even = _client_even.requestJob(origin,destination,price);
+
       jv_odd = _client_odd.decideJob(jv_odd.getJobIdentifier(), false);
       jv_even = _client_even.decideJob(jv_even.getJobIdentifier(), false);
 
