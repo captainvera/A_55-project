@@ -82,7 +82,10 @@ public class BrokerPort implements BrokerPortType{
 
     public static Location fromValue(String v) {
       try{
-        Location ret = valueOf(v);
+        Location ret = null;
+        if(v != null) {
+          ret = valueOf(v);
+        }
         return ret;
       }catch(IllegalArgumentException e){
         return null;
