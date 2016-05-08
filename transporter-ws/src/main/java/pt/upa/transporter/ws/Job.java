@@ -2,7 +2,8 @@ package pt.upa.transporter.ws;
 
 import java.util.ArrayList;
 import java.util.List;
-import pt.upa.broker.ws.BrokerPort.Location; 
+
+import pt.upa.Location;
 
 public class Job {
 
