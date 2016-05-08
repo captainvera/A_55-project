@@ -7,7 +7,6 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 import pt.upa.transporter.ws.*;
-import pt.upa.transporter.ws.cli.*;
 import pt.upa.transporter.*;
 
 import java.lang.Thread;

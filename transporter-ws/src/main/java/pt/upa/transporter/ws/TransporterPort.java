@@ -7,7 +7,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.jws.WebService;
-import pt.upa.broker.ws.BrokerPort.Location; 
+
+import pt.upa.Location;
 
 @WebService(
   endpointInterface="pt.upa.transporter.ws.TransporterPortType",
