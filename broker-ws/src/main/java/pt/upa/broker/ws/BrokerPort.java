@@ -185,6 +185,7 @@ public class BrokerPort implements BrokerPortType{
 			System.out.printf("Order 66 on transporter %d%n", i+1);
 			i++;
 		}
+    _transports.clear();
 		System.out.println("The Sith Shall Rule again.");
 	}
 
