@@ -30,7 +30,7 @@ public class BrokerApplication {
 			System.out.println("[DEBUG] I'm secondary!");
 		}
 
-		endpoint = Endpoint.create(new BrokerPort(isPrimary));
+		endpoint = Endpoint.create(new BrokerPort(isPrimary, url));
 
 		//publishing endpoint
 		System.out.printf("Publishing endpoint %s%n", url);

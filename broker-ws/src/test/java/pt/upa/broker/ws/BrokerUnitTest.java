@@ -72,7 +72,7 @@ public class BrokerUnitTest{
 			result = "UpaTransporter1";
 		}};
 
-		broker = new BrokerPort(true);
+		broker = new BrokerPort();
 	}
 
 	@After

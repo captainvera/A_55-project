@@ -34,26 +34,61 @@ public class BrokerPort implements BrokerPortType{
 	ArrayList<Transport> _transports = new ArrayList<Transport>();
 	int _idCounter;
 	BrokerPortType _broker;
+	boolean _primary;
 
-  public BrokerPort(boolean primary) throws Exception{
+	public BrokerPort() throws Exception{
+		connectToTransporters();
+		System.out.println("Broker Initalized.");
+  }
+
+  public BrokerPort(boolean primary, String url) throws Exception{
+		_primary = primary;
 		if(primary){
-			connectToBrokerByURI("http://localhost:8090/broker-ws/endpoint");
 			connectToTransporters();
-			_primary = primary;
+		}
+		else{
+			connectToBroker();
+			_broker.sendInfo(url);
 		}
 		System.out.println("Broker Initalized.");
   }
 
-	public void connectToBrokerByURI(String endp) throws Exception {
-    BrokerPortType port = null;
-    BrokerService service = new BrokerService();
-    port = service.getBrokerPort();
-    System.out.println("Setting endpoint address ...");
-    BindingProvider bindingProvider = (BindingProvider) port;
-    Map<String, Object> requestContext = bindingProvider.getRequestContext();
-    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endp);
-    System.out.println("Connection succesful to " + endp);
-    _broker = port;
+	public void connectToBroker() throws Exception{
+		String uURL = "http://localhost:9090";
+		UDDINaming uddiNaming = new UDDINaming(uURL);
+		String epAddress = uddiNaming.lookup("UpaBroker");
+
+		if(epAddress == null){
+			System.out.println("Broker not found");
+			return;
+		}
+		else System.out.printf("Connected to broker @%s%n", epAddress);
+
+		BrokerService service = new BrokerService();
+
+		_broker = service.getBrokerPort();
+
+		BindingProvider bindingProvider = (BindingProvider) _broker;
+
+		Map<String, Object> requestContext = bindingProvider.getRequestContext();
+		requestContext.put(ENDPOINT_ADDRESS_PROPERTY, epAddress);
+	}
+
+	public void connectToBrokerByURI(String endp) {
+		try{
+    	BrokerPortType port = null;
+    	BrokerService service = new BrokerService();
+    	port = service.getBrokerPort();
+    	System.out.println("Setting endpoint address ...");
+    	BindingProvider bindingProvider = (BindingProvider) port;
+    	Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    	requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endp);
+    	System.out.println("Connection succesful to " + endp);
+    	_broker = port;
+		} catch(Exception e){
+			System.out.printf("Caught exception: %s%n", e);
+			e.printStackTrace();
+		}
   }
 
   private void connectToTransporters() throws JAXRException{
@@ -271,6 +306,17 @@ public class BrokerPort implements BrokerPortType{
 		return newTransport.getId();
 	}
 
-	public void update() {}
+	public void update(TransportView transport) {
+		Transport transportToUpdate = getTransportById(transport.getId());
+		if (transportToUpdate == null) {
+			transportToUpdate = new Transport(transport);
+			_transports.add(transportToUpdate);
+			return ;
+		}
+		transportToUpdate.setState(transport.getState());
+	}
 
+	public void sendInfo(String url){
+		connectToBrokerByURI(url);
+	}
 }
