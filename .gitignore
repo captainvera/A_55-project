@@ -5,3 +5,5 @@
 .classpath
 .settings
 */target/
+#VIM
+.swp
