@@ -3,6 +3,8 @@ package pt.upa.broker.ws;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
@@ -33,7 +35,7 @@ public class BrokerPort implements BrokerPortType{
 	TreeMap<String, TransporterClient> transporters = new TreeMap<String, TransporterClient>();
 	ArrayList<Transport> _transports = new ArrayList<Transport>();
 	int _idCounter;
-
+  private Timer _timer;
 
   public BrokerPort() throws Exception{
     System.out.println("Broker Initalized.");
@@ -235,7 +237,7 @@ public class BrokerPort implements BrokerPortType{
 			throw new UnavailableTransportFault_Exception("No Transport Available", utf);
 		}
 
-		checkBestTransporter(_jobs, newTransport);
+  	checkBestTransporter(_jobs, newTransport);
 
 		newTransport.setState(TransportStateView.BUDGETED);
 
@@ -255,5 +257,28 @@ public class BrokerPort implements BrokerPortType{
 		return newTransport.getId();
 	}
 
+  
+  protected void stillAlive(){
+    TimerTask timerTask = new TimerTask() {
+      @Override
+      public void run() {
+        System.out.println("STILL ALIVE and kicking");
+        String ret = _broker.ping();
+        if(ret == null){
+          GYST();
+        }
+      }
+    };
+    if(timer != null)
+      timer.cancel();
+    timer = new Timer();
+    timer.schedule(timerTask, 10000);
+  }
 
+  private void GYST(){
+  
+    //TODO 
+  
+  
+  }
 }
