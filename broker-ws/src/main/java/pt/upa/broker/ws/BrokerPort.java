@@ -21,7 +21,7 @@ import pt.upa.Location;
 
 @WebService(
 endpointInterface="pt.upa.broker.ws.BrokerPortType",
-wsdlLocation="broker.1_0.wsdl",
+wsdlLocation="broker.2_0.wsdl",
 name="UpaBroker",
 portName="BrokerPort",
 targetNamespace="http://ws.broker.upa.pt/",
@@ -33,11 +33,27 @@ public class BrokerPort implements BrokerPortType{
 	TreeMap<String, TransporterClient> transporters = new TreeMap<String, TransporterClient>();
 	ArrayList<Transport> _transports = new ArrayList<Transport>();
 	int _idCounter;
+	BrokerPortType _broker;
 
+  public BrokerPort(boolean primary) throws Exception{
+		if(primary){
+			connectToBrokerByURI("http://localhost:8090/broker-ws/endpoint");
+			connectToTransporters();
+			_primary = primary;
+		}
+		System.out.println("Broker Initalized.");
+  }
 
-  public BrokerPort() throws Exception{
-    System.out.println("Broker Initalized.");
-    connectToTransporters();
+	public void connectToBrokerByURI(String endp) throws Exception {
+    BrokerPortType port = null;
+    BrokerService service = new BrokerService();
+    port = service.getBrokerPort();
+    System.out.println("Setting endpoint address ...");
+    BindingProvider bindingProvider = (BindingProvider) port;
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endp);
+    System.out.println("Connection succesful to " + endp);
+    _broker = port;
   }
 
   private void connectToTransporters() throws JAXRException{
@@ -255,5 +271,6 @@ public class BrokerPort implements BrokerPortType{
 		return newTransport.getId();
 	}
 
+	public void update() {}
 
 }

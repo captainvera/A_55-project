@@ -62,7 +62,7 @@ public class BrokerUnitTest{
 		new StrictExpectations() {{
 			new UDDINaming(anyString);
 
-			uddi.list("UpaTransporter%"); 
+			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
 			new TransporterClient();
@@ -72,7 +72,7 @@ public class BrokerUnitTest{
 			result = "UpaTransporter1";
 		}};
 
-		broker = new BrokerPort();
+		broker = new BrokerPort(true);
 	}
 
 	@After
@@ -84,7 +84,7 @@ public class BrokerUnitTest{
 		new NonStrictExpectations() {{
 			new UDDINaming(anyString);
 
-			uddi.list("UpaTransporter%"); 
+			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
 			new TransporterClient();
@@ -101,15 +101,15 @@ public class BrokerUnitTest{
 		broker.requestTransport("Leiria", "Lisboa", 50);
 		broker.requestTransport("Leiria", "Lisboa", 50);
 
-		
+
 	}
-	
+
 	@Test
 	public void testsuccess() throws Exception{
 		new StrictExpectations() {{
 			new UDDINaming(anyString);
 
-			uddi.list("UpaTransporter%"); 
+			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
 			new TransporterClient();
@@ -124,7 +124,7 @@ public class BrokerUnitTest{
 			client.jobStatus("Lisboa" + "T" + "Leiria" + "ID" + "1");
 			result = jv1;
 		}};
-		
+
 		String identifier = broker.requestTransport("Leiria", "Lisboa", 50);
 		TransportView transport = broker.viewTransport(identifier);
     assertEquals(transport.getOrigin(), "Leiria");
@@ -142,7 +142,7 @@ public class BrokerUnitTest{
 		new StrictExpectations() {{
 			new UDDINaming(anyString);
 
-			uddi.list("UpaTransporter%"); 
+			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
 			new TransporterClient();
@@ -160,7 +160,7 @@ public class BrokerUnitTest{
 		new StrictExpectations() {{
 			new UDDINaming(anyString);
 
-			uddi.list("UpaTransporter%"); 
+			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
 			new TransporterClient();
@@ -178,7 +178,7 @@ public class BrokerUnitTest{
 		new StrictExpectations() {{
 			new UDDINaming(anyString);
 
-			uddi.list("UpaTransporter%"); 
+			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
 			new TransporterClient();
@@ -195,30 +195,30 @@ public class BrokerUnitTest{
 		System.out.println("[TEST] Unavailable Transport ");
 		new StrictExpectations() {{
 			new UDDINaming(anyString);
-  		uddi.list("UpaTransporter%"); 
+  		uddi.list("UpaTransporter%");
   		result = _endpoints;
   		new TransporterClient();
   		client.connectToTransporterByURI(anyString);
   		client.ping();
   		result = "UpaTransporter1";
-  		
+
 			client.requestJob("Beja", "Porto", 10);
 			result = new UnavailableTransportFault_Exception("Fabrication", null);
 		}};
 		broker.requestTransport("Beja", "Porto", 10);
 	}
-	
+
 	@Test(expected=UnavailableTransportFault_Exception.class)
   public void testPriceTooHigh() throws Exception{
     System.out.println("[TEST] Price too high ");
     new StrictExpectations() {{
 			new UDDINaming(anyString);
-  		
-  		uddi.list("UpaTransporter%"); 
+
+  		uddi.list("UpaTransporter%");
   		result = _endpoints;
-  		
+
   		new TransporterClient();
-  		
+
   		client.connectToTransporterByURI(anyString);
   		client.ping();
   		result = "UpaTransporter1";
@@ -227,7 +227,7 @@ public class BrokerUnitTest{
 		}};
     broker.requestTransport("Beja", "Lisboa", 101);
   }
-  
+
 	@Test
 	public void testListJobs() throws Exception{
 		System.out.println("[TEST] List Jobs ");
@@ -236,7 +236,7 @@ public class BrokerUnitTest{
 		assertEquals(transps.size(), 3);
 
 	}
-	
+
 	@Test
 	public void clearTransports(){
 		System.out.println("[TEST] clear Transports ");
@@ -247,7 +247,7 @@ public class BrokerUnitTest{
 		broker.clearTransports();
 
 	}
-	
+
 
 
 }
