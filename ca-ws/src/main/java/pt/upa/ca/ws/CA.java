@@ -4,7 +4,5 @@ import javax.jws.WebService;
 
 @WebService
 public interface CA {
-
-	String sayHello(String name);
-
+	String requestCertificate(String name);
 }

@@ -7,8 +7,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.jws.WebService;
+import javax.jws.HandlerChain;
+
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.WebServiceContext;
+import javax.annotation.Resource;
 
 import pt.upa.Location;
+import pt.upa.ws.handler.SecurityHandler;
 
 @WebService(
   endpointInterface="pt.upa.transporter.ws.TransporterPortType",
@@ -18,6 +24,7 @@ import pt.upa.Location;
   targetNamespace="http://ws.transporter.upa.pt/",
   serviceName="TransporterService"
 )
+@HandlerChain(file="/handler-chain.xml")
 public class TransporterPort implements TransporterPortType {
 
   protected ArrayList<Job> _jobs;
@@ -26,6 +33,15 @@ public class TransporterPort implements TransporterPortType {
   protected int _idCounter;
   protected boolean _even;
   
+	@Resource
+	private WebServiceContext webServiceContext;
+
+  private void setMessageContext(){
+		MessageContext messageContext = webServiceContext.getMessageContext();
+		messageContext.put(SecurityHandler.WS_IDENTIFIER, _name);
+		messageContext.put(SecurityHandler.WS_KEYSTORE_FILE, "keys/"+_name+".jks");
+		messageContext.put(SecurityHandler.WS_CERT_FILE, "keys/"+_name+".cer");
+  }
   /**
    * -----------------------------------------------
    * Timer Logic
@@ -89,7 +105,6 @@ public class TransporterPort implements TransporterPortType {
     _idCounter = 0;
     _name = name;
     _num = Character.getNumericValue(name.charAt(name.length() - 1));
-
     
     _even = (_num%2==0);
 
@@ -101,10 +116,12 @@ public class TransporterPort implements TransporterPortType {
   }
 
   public String ping(String name) {
+    setMessageContext();
     return _name;
   }
 
   public JobView requestJob(String origin, String destination, int price) throws BadLocationFault_Exception, BadPriceFault_Exception {
+    setMessageContext();
   
     /**
      * Location checking ------------------------------------------------------------
@@ -176,6 +193,7 @@ public class TransporterPort implements TransporterPortType {
   }
   
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
+    setMessageContext();
     Job jv = getJobByIdentifier(id);
     if(jv == null || jv.getJobState() != JobStateView.PROPOSED){
       BadJobFault bjf = new BadJobFault();
@@ -192,11 +210,13 @@ public class TransporterPort implements TransporterPortType {
   }
   
   public JobView jobStatus(String id) {
+    setMessageContext();
     Job j = getJobByIdentifier(id);
     return (j == null) ? null : j.toJobView();
   }
 
   public List<JobView> listJobs(){
+    setMessageContext();
     ArrayList<JobView> _jviews = new ArrayList<JobView>();
     for(Job j : _jobs){
       _jviews.add(j.toJobView());
@@ -205,6 +225,7 @@ public class TransporterPort implements TransporterPortType {
   }
 
   public void clearJobs(){
+    setMessageContext();
     _jobs.clear(); 
   }
 
