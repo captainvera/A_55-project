@@ -12,26 +12,37 @@ public class BrokerApplication {
 
 	public static void main(String[] args) throws Exception {
 		System.out.println(BrokerApplication.class.getSimpleName() + " starting...");
-	
+
 	String uddiURL = args[0];
 	String name = args[1];
 	String url = args[2];
-		
+
 	Endpoint endpoint = null;
 	UDDINaming uddiNaming = null;
-	
+	boolean isPrimary = true;
 	try {
-		endpoint = Endpoint.create(new BrokerPort());
-		
+		if(url.charAt(19) == '8'){
+			System.out.println("[DEBUG] I'm primary!");
+			isPrimary = true;
+		}
+		else{
+			isPrimary = false;
+			System.out.println("[DEBUG] I'm secondary!");
+		}
+
+		endpoint = Endpoint.create(new BrokerPort(isPrimary));
+
 		//publishing endpoint
 		System.out.printf("Publishing endpoint %s%n", url);
 		endpoint.publish(url);
-		
+
 		//publishing to UDDI
-		System.out.printf("Publishing to UDDI: %s%n With name: %s%n", uddiURL, name);
-		uddiNaming = new UDDINaming(uddiURL);
-		uddiNaming.rebind(name, url);
-		
+		if(isPrimary){
+			System.out.printf("Publishing to UDDI: %s%n With name: %s%n", uddiURL, name);
+			uddiNaming = new UDDINaming(uddiURL);
+			uddiNaming.rebind(name, url);
+		}
+
 		System.out.println("Waiting for connections");
 		System.out.println("Time is money, friend!");
 		System.in.read();
@@ -47,7 +58,7 @@ public class BrokerApplication {
 			System.out.printf("Caught exception when stopping: %s%n", e);
 			e.printStackTrace();
 		}
-	
+
 		try {
 			if (uddiNaming != null) {
 				uddiNaming.unbind(name);
@@ -57,9 +68,8 @@ public class BrokerApplication {
 			System.out.printf("Caught exception when unbinding: %s%n", e);
 		}
 	}
-	
-		
-		
+
+
 	}
 
 }

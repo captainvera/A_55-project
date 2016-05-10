@@ -12,18 +12,18 @@
 
 <definitions
     xmlns="http://schemas.xmlsoap.org/wsdl/"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"
     xmlns:tns="http://ws.broker.upa.pt/"
-    targetNamespace="http://ws.broker.upa.pt/" 
+    targetNamespace="http://ws.broker.upa.pt/"
     name="BrokerWebService">
 
     <!-- Data type definitions -->
     <types>
         <xs:schema version="1.0"
             targetNamespace="http://ws.broker.upa.pt/">
-        
+
             <xs:complexType name="transportView">
                 <xs:sequence>
                     <xs:element name="id" type="xs:string" minOccurs="0" />
@@ -34,7 +34,7 @@
                     <xs:element name="state" type="tns:transportStateView" minOccurs="0" />
                 </xs:sequence>
             </xs:complexType>
-        
+
             <xs:simpleType name="transportStateView">
                 <xs:restriction base="xs:string">
                     <xs:enumeration value="REQUESTED" />
@@ -46,23 +46,23 @@
                     <xs:enumeration value="COMPLETED" />
                 </xs:restriction>
             </xs:simpleType>
-        
-        
+
+
             <xs:complexType name="ping">
                 <xs:sequence>
                     <xs:element name="name" type="xs:string" minOccurs="0" />
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="ping" type="tns:ping" />
-        
+
             <xs:complexType name="pingResponse">
                 <xs:sequence>
                     <xs:element name="return" type="xs:string" minOccurs="0" />
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="pingResponse" type="tns:pingResponse" />
-        
-        
+
+
             <xs:complexType name="requestTransport">
                 <xs:sequence>
                     <xs:element name="origin" type="xs:string" minOccurs="0" />
@@ -71,68 +71,68 @@
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="requestTransport" type="tns:requestTransport" />
-        
+
             <xs:complexType name="requestTransportResponse">
                 <xs:sequence>
                     <xs:element name="return" type="xs:string" minOccurs="0" />
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="requestTransportResponse" type="tns:requestTransportResponse" />
-        
-        
+
+
             <xs:complexType name="viewTransport">
                 <xs:sequence>
                     <xs:element name="id" type="xs:string" />
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="viewTransport" type="tns:viewTransport" />
-        
+
             <xs:complexType name="viewTransportResponse">
                 <xs:sequence>
                     <xs:element name="return" type="tns:transportView" minOccurs="0" />
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="viewTransportResponse" type="tns:viewTransportResponse" />
-        
+
 
             <xs:complexType name="listTransports">
                 <xs:sequence />
             </xs:complexType>
             <xs:element name="listTransports" type="tns:listTransports" />
-        
+
             <xs:complexType name="listTransportsResponse">
                 <xs:sequence>
                     <xs:element name="return" type="tns:transportView" minOccurs="0" maxOccurs="unbounded" />
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="listTransportsResponse" type="tns:listTransportsResponse" />
-        
-        
+
+
             <xs:complexType name="clearTransports">
                 <xs:sequence />
             </xs:complexType>
             <xs:element name="clearTransports" type="tns:clearTransports" />
-        
+
             <xs:complexType name="clearTransportsResponse">
                 <xs:sequence />
             </xs:complexType>
             <xs:element name="clearTransportsResponse" type="tns:clearTransportsResponse" />
-        
-        
+
+
             <xs:complexType name="UnknownLocationFault">
                 <xs:sequence>
                     <xs:element name="location" type="xs:string" minOccurs="0" />
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="UnknownLocationFault" type="tns:UnknownLocationFault" />
-        
+
             <xs:complexType name="InvalidPriceFault">
                 <xs:sequence>
                     <xs:element name="price" type="xs:int" minOccurs="0" />
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="InvalidPriceFault" type="tns:InvalidPriceFault" />
-        
+
             <xs:complexType name="UnavailableTransportFault">
                 <xs:sequence>
                     <xs:element name="origin" type="xs:string" minOccurs="0" />
@@ -140,7 +140,7 @@
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="UnavailableTransportFault" type="tns:UnavailableTransportFault" />
-        
+
             <xs:complexType name="UnavailableTransportPriceFault">
                 <xs:sequence>
                     <xs:element name="bestPriceFound" type="xs:int" minOccurs="0" />
@@ -154,7 +154,7 @@
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="UnknownTransportFault" type="tns:UnknownTransportFault" />
-        
+
         </xs:schema>
     </types>
 

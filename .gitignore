@@ -6,4 +6,4 @@
 .settings
 */target/
 #VIM
-.swp
+*.swp
