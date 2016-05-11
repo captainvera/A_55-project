@@ -39,8 +39,30 @@ public class BrokerClient {
 
 		Map<String, Object> requestContext = bindingProvider.getRequestContext();
 		requestContext.put(ENDPOINT_ADDRESS_PROPERTY, epAddress);
-		System.out.printf("Connection to %s succesfull%n", name);
 
+		/*int connectionTimeout = 1000;
+    final List<String> CONN_TIME_PROPS = new ArrayList<String>();
+    CONN_TIME_PROPS.add("com.sun.xml.ws.connect.timeout");
+    CONN_TIME_PROPS.add("com.sun.xml.internal.ws.connect.timeout");
+    CONN_TIME_PROPS.add("javax.xml.ws.client.connectionTimeout");
+
+    // Set timeout until a connection is established (unit is milliseconds; 0 means infinite)
+    for (String propName : CONN_TIME_PROPS)
+      requestContext.put(propName, connectionTimeout);
+    System.out.printf("Set connection timeout to %d milliseconds%n", connectionTimeout);
+
+    int receiveTimeout = 2000;
+    final List<String> RECV_TIME_PROPS = new ArrayList<String>();
+    RECV_TIME_PROPS.add("com.sun.xml.ws.request.timeout");
+    RECV_TIME_PROPS.add("com.sun.xml.internal.ws.request.timeout");
+    RECV_TIME_PROPS.add("javax.xml.ws.client.receiveTimeout");
+
+    // Set timeout until the response is received (unit is milliseconds; 0 means infinite)
+    for (String propName : RECV_TIME_PROPS)
+      requestContext.put(propName, receiveTimeout);
+    System.out.printf("Set receive timeout to %d milliseconds%n", receiveTimeout);*/
+
+		System.out.printf("Connection to %s succesfull%n", name);
 	}
 
 	public String ping(String name){
