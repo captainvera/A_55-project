@@ -161,7 +161,7 @@ public class BrokerPort implements BrokerPortType{
 			default:
 			break;
 		}
-
+		if(_primary) _broker.update(tv.toTransportView());
 		return tv.toTransportView();
 	}
 
@@ -174,6 +174,7 @@ public class BrokerPort implements BrokerPortType{
 			i++;
 		}
     _transports.clear();
+		if(_primary) _broker.clearTransports();
 		System.out.println("The Sith Shall Rule again.");
 	}
 
@@ -182,6 +183,15 @@ public class BrokerPort implements BrokerPortType{
     for(Transport t : _transports){
       _tviews.add(t.toTransportView());
     }
+		if(_primary){
+			System.out.println("SECONDARY: ");
+			List<TransportView> cenas = new ArrayList<TransportView>();
+			cenas = _broker.listTransports();
+			for(TransportView t : cenas){
+				System.out.println("TRANSPORT: " + t.getId() + " price " + t.getPrice() + " state: " + t.getState().value());
+			}
+			System.out.println("----------------------------");
+		}
     return _tviews;
 	}
 
@@ -303,6 +313,7 @@ public class BrokerPort implements BrokerPortType{
 			newTransport.setState(TransportStateView.BOOKED);
 		}
 		_transports.add(newTransport);
+		if(_primary) _broker.update(newTransport.toTransportView());
 		return newTransport.getId();
 	}
 

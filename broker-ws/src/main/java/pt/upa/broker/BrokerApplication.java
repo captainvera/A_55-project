@@ -21,7 +21,10 @@ public class BrokerApplication {
 	UDDINaming uddiNaming = null;
 	boolean isPrimary = true;
 	try {
-		if(url.charAt(19) == '8'){
+		String uURL = "http://localhost:9090";
+		uddiNaming = new UDDINaming(uURL);
+		String epAddress = uddiNaming.lookup(name);
+		if(epAddress == null){
 			System.out.println("[DEBUG] I'm primary!");
 			isPrimary = true;
 		}
