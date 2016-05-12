@@ -15,7 +15,7 @@ public class BrokerClientApplication {
 		BrokerClient brokerclient = new BrokerClient();
 
 		brokerclient.connectToBroker("UpaBroker");
-		brokerclient.ping("Broker Client");
+    brokerclient.ping("Broker Client");
 		String request = brokerclient.requestTransport("Lisboa", "Leiria", 10);
 		System.out.println ("REQUEST: " + request);
 		List<TransportView> cenas = new ArrayList<TransportView>();
@@ -32,18 +32,19 @@ public class BrokerClientApplication {
 			System.out.println("TRANSPORT: " + t.getId() + " price " + t.getPrice() + " state: " + t.getState().value());
 		}
 		System.out.println("----------------------------");
-		/*try{
+		try{
 			while(true){
 				String tv = brokerclient.ping("me");
+        Thread.sleep(2000);
 				System.out.println("[RESPONSE] " + tv);
 			}
 		} catch(WebServiceException wse) {
-      System.out.println("Caught: " + wse);
+      System.out.println("Caught: " + wse.getCause());
       Throwable cause = wse.getCause();
       if (cause != null && cause instanceof SocketTimeoutException) {
           System.out.println("The cause was a timeout exception: " + cause);
       }
-  	}*/
+  	}
 	}
 
 }

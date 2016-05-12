@@ -39,6 +39,8 @@ public class BrokerPort implements BrokerPortType{
   BrokerPortType _broker;
   boolean _primary;
   private String _url;
+  final private int aliveTime = 1; //When a secondary broker is connected, send life proof every aliveTime seconds.
+  final private int waitTime = 4; //If the broker is secondary it will wait waitTime seconds to receive info from the primary broker.
 
   public BrokerPort() throws Exception{
     connectToTransporters();
@@ -54,7 +56,7 @@ public class BrokerPort implements BrokerPortType{
     else{
       connectToBroker();
       _broker.sendInfo(url);
-      stillAlive(10);
+      isAlive(waitTime);
     }
     System.out.println("Broker Initalized.");
   }
@@ -123,9 +125,11 @@ public class BrokerPort implements BrokerPortType{
   }
 
   public String ping(String name){
+    if(_primary == false)
+      isAlive(waitTime);
     String res = new String();
-    System.out.printf("Pinging all transporters%n");
     for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
+      System.out.printf("Pinging transporter.%n");
       entry.getValue().ping();
     }
     return "Contact has been established with " + transporters.size() + " Transporters.\n";
@@ -168,7 +172,7 @@ public class BrokerPort implements BrokerPortType{
 			default:
 			break;
 		}
-		if(_primary) _broker.update(tv.toTransportView());
+		//if(_primary) _broker.update(tv.toTransportView());
 		return tv.toTransportView();
 	}
 
@@ -181,7 +185,7 @@ public class BrokerPort implements BrokerPortType{
 			i++;
 		}
     _transports.clear();
-		if(_primary) _broker.clearTransports();
+		if(_primary && _broker != null) _broker.clearTransports();
 		System.out.println("The Sith Shall Rule again.");
 	}
 
@@ -193,7 +197,8 @@ public class BrokerPort implements BrokerPortType{
 		if(_primary){
 			System.out.println("SECONDARY: ");
 			List<TransportView> cenas = new ArrayList<TransportView>();
-			cenas = _broker.listTransports();
+      if(_broker != null)
+        cenas = _broker.listTransports();
 			for(TransportView t : cenas){
 				System.out.println("TRANSPORT: " + t.getId() + " price " + t.getPrice() + " state: " + t.getState().value());
 			}
@@ -320,23 +325,17 @@ public class BrokerPort implements BrokerPortType{
       newTransport.setState(TransportStateView.BOOKED);
     }
     _transports.add(newTransport);
-    if(_primary) _broker.update(newTransport.toTransportView());
+    //if(_primary) _broker.update(newTransport.toTransportView());
     return newTransport.getId();
   }
 
-  protected void stillAlive(int time) throws Exception{
+  protected void stillAlive(int time) {
     TimerTask _timerTask = new TimerTask() {
       @Override
       public void run() {
-        try{
-          _broker.ping("ping");
-          System.out.println("STILL ALIVE and kicking");
-          stillAlive(10);
-        } catch (Exception e) {
-          try{
-            GYST();
-          } catch (Exception eg){}
-        }
+        if (_broker != null)
+          _broker.ping("i'm still alive.");
+        stillAlive(time);
       }
     };
     if(_timer != null)
@@ -345,16 +344,37 @@ public class BrokerPort implements BrokerPortType{
     _timer.schedule(_timerTask, time*1000);
   }
 
+  protected void isAlive(int time){
+    TimerTask _timerTask = new TimerTask() {
+      @Override
+      public void run() {
+        System.out.println("Primary is dead! dead I tell ya...");
+        try{
+          GYST();
+        }catch (Exception e) {e.printStackTrace();}
+      }
+    };
+    if(_timer != null)
+      _timer.cancel();
+    _timer = new Timer();
+    System.out.println("Primary lives.");
+    _timer.schedule(_timerTask, time*1000);
+  }
+
   private void GYST() throws Exception{
+    _primary = true;
     System.out.println("ASSUMING CONTROL");
     connectToTransporters();
     System.out.println("All your base are belong to us");
     String uURL = "http://localhost:9090";
     UDDINaming uddiNaming = new UDDINaming(uURL);
     uddiNaming.rebind("UpaBroker", _url);
+    _broker = null;
   }
 
   public void update(TransportView transport) {
+    if(_primary == false)
+      isAlive(waitTime);
     Transport transportToUpdate = getTransportById(transport.getId());
     if (transportToUpdate == null) {
       transportToUpdate = new Transport(transport);
@@ -366,6 +386,7 @@ public class BrokerPort implements BrokerPortType{
 
   public void sendInfo(String url){
     connectToBrokerByURI(url);
+    stillAlive(aliveTime);
   }
 
 }
