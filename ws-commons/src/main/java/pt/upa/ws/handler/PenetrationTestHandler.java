@@ -37,7 +37,7 @@ public class PenetrationTestHandler implements SOAPHandler<SOAPMessageContext> {
       Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
       if (outbound) {
         //repeatMessage(smc);
-        tamperNonce(smc);
+        //tamperNonce(smc);
         // tamperBody(smc);
         // logBody(smc);
       }

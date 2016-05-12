@@ -71,8 +71,8 @@ public class TransporterApplication {
     String name = args[1];
     String url = args[2];
 
-    Context.WS_IDENTIFIER = name;
-    Context.WS_KEYSTORE_FILE = "keys/"+name+".jks";
+    Context.WS_IDENTIFIER = name ;
+    Context.WS_KEYSTORE_FILE = "keys/" + name + ".jks";
 
     TransporterApplication tc = new TransporterApplication();
     try{

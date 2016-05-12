@@ -19,7 +19,7 @@ public class CAImpl implements CA {
 
   public CAImpl(){
     _certificates.put("UpaTransporter1", "keys/UpaTransporter1.cer");
-    _certificates.put("UpaTransporter2", "keys/upatransporter2.cer");
+    _certificates.put("UpaTransporter2", "keys/UpaTransporter2.cer");
     _certificates.put("Broker", "keys/Broker.cer");
   }
 
