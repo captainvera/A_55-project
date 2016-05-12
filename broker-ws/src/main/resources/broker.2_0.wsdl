@@ -126,10 +126,6 @@
             </xs:complexType>
             <xs:element name="update" type="tns:update" />
 
-            <xs:complexType name="updateResponse">
-                <xs:sequence />
-            </xs:complexType>
-            <xs:element name="updateResponse" type="tns:updateResponse" />
 
             <xs:complexType name="sendInfo">
                 <xs:sequence>
@@ -142,6 +138,17 @@
                 <xs:sequence />
             </xs:complexType>
             <xs:element name="sendInfoResponse" type="tns:sendInfoResponse" />
+
+
+            <xs:complexType name="primaryLives">
+                <xs:sequence />
+            </xs:complexType>
+            <xs:element name="primaryLives" type="tns:primaryLives" />
+
+            <xs:complexType name="primaryLivesResponse">
+                <xs:sequence />
+            </xs:complexType>
+            <xs:element name="primaryLivesResponse" type="tns:primaryLivesResponse" />
 
 
             <xs:complexType name="UnknownLocationFault">
@@ -222,15 +229,19 @@
     <message name="update">
         <part name="parameters" element="tns:update" />
     </message>
-    <message name="updateResponse">
-        <part name="parameters" element="tns:updateResponse" />
-    </message>
 
     <message name="sendInfo">
         <part name="parameters" element="tns:sendInfo" />
     </message>
     <message name="sendInfoResponse">
         <part name="parameters" element="tns:sendInfoResponse" />
+    </message>
+
+    <message name="primaryLives">
+        <part name="parameters" element="tns:primaryLives" />
+    </message>
+    <message name="primaryLivesResponse">
+        <part name="parameters" element="tns:primaryLivesResponse" />
     </message>
 
     <message name="UnknownLocationFault">
@@ -310,9 +321,6 @@
             <input
                 wsam:Action="http://ws.broker.upa.pt/BrokerPort/updateRequest"
                 message="tns:update" />
-            <output
-                wsam:Action="http://ws.broker.upa.pt/BrokerPort/updateResponse"
-                message="tns:updateResponse" />
         </operation>
 
         <operation name="sendInfo">
@@ -323,7 +331,16 @@
                 wsam:Action="http://ws.broker.upa.pt/BrokerPort/sendInfoResponse"
                 message="tns:sendInfoResponse" />
         </operation>
+        <operation name="primaryLives">
+            <input
+                wsam:Action="http://ws.broker.upa.pt/BrokerPort/primaryLivesRequest"
+                message="tns:primaryLives" />
+            <output
+                wsam:Action="http://ws.broker.upa.pt/BrokerPort/primaryLivesResponse"
+                message="tns:primaryLivesResponse" />
+        </operation>
     </portType>
+
 
     <!-- SOAP/HTTP Binding -->
     <binding name="BrokerPortSoapHttpBinding" type="tns:BrokerPortType">
@@ -402,12 +419,19 @@
             <input>
                 <soap:body use="literal" />
             </input>
+        </operation>
+
+        <operation name="sendInfo">
+            <soap:operation soapAction="" />
+            <input>
+                <soap:body use="literal" />
+            </input>
             <output>
                 <soap:body use="literal" />
             </output>
         </operation>
 
-        <operation name="sendInfo">
+        <operation name="primaryLives">
             <soap:operation soapAction="" />
             <input>
                 <soap:body use="literal" />
