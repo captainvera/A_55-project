@@ -125,8 +125,6 @@ public class BrokerPort implements BrokerPortType{
   }
 
   public String ping(String name){
-    if(_primary == false)
-      isAlive(waitTime);
     String res = new String();
     for (Map.Entry<String, TransporterClient> entry : transporters.entrySet()){
       System.out.printf("Pinging transporter.%n");
@@ -172,7 +170,7 @@ public class BrokerPort implements BrokerPortType{
 			default:
 			break;
 		}
-		//if(_primary) _broker.update(tv.toTransportView());
+		if(_primary && _broker != null) _broker.update(tv.toTransportView());
 		return tv.toTransportView();
 	}
 
@@ -194,7 +192,7 @@ public class BrokerPort implements BrokerPortType{
     for(Transport t : _transports){
       _tviews.add(t.toTransportView());
     }
-		if(_primary){
+		/*if(_primary){
 			System.out.println("SECONDARY: ");
 			List<TransportView> cenas = new ArrayList<TransportView>();
       if(_broker != null)
@@ -203,7 +201,7 @@ public class BrokerPort implements BrokerPortType{
 				System.out.println("TRANSPORT: " + t.getId() + " price " + t.getPrice() + " state: " + t.getState().value());
 			}
 			System.out.println("----------------------------");
-		}
+		}*/ //JUST USED FOR DEBUG
     return _tviews;
   }
 
@@ -325,7 +323,7 @@ public class BrokerPort implements BrokerPortType{
       newTransport.setState(TransportStateView.BOOKED);
     }
     _transports.add(newTransport);
-    //if(_primary) _broker.update(newTransport.toTransportView());
+    if(_primary && _broker != null) _broker.update(newTransport.toTransportView());
     return newTransport.getId();
   }
 
@@ -334,7 +332,7 @@ public class BrokerPort implements BrokerPortType{
       @Override
       public void run() {
         if (_broker != null)
-          _broker.ping("i'm still alive.");
+          _broker.primaryLives();
         stillAlive(time);
       }
     };
@@ -389,4 +387,10 @@ public class BrokerPort implements BrokerPortType{
     stillAlive(aliveTime);
   }
 
+  public void primaryLives(){
+    if(!_primary){
+      System.out.println("Primary still alive!");
+      isAlive(waitTime);
+    }
+  }
 }

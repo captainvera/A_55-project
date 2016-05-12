@@ -140,6 +140,17 @@
             <xs:element name="sendInfoResponse" type="tns:sendInfoResponse" />
 
 
+            <xs:complexType name="primaryLives">
+                <xs:sequence />
+            </xs:complexType>
+            <xs:element name="primaryLives" type="tns:primaryLives" />
+
+            <xs:complexType name="primaryLivesResponse">
+                <xs:sequence />
+            </xs:complexType>
+            <xs:element name="primaryLivesResponse" type="tns:primaryLivesResponse" />
+
+
             <xs:complexType name="UnknownLocationFault">
                 <xs:sequence>
                     <xs:element name="location" type="xs:string" minOccurs="0" />
@@ -224,6 +235,13 @@
     </message>
     <message name="sendInfoResponse">
         <part name="parameters" element="tns:sendInfoResponse" />
+    </message>
+
+    <message name="primaryLives">
+        <part name="parameters" element="tns:primaryLives" />
+    </message>
+    <message name="primaryLivesResponse">
+        <part name="parameters" element="tns:primaryLivesResponse" />
     </message>
 
     <message name="UnknownLocationFault">
@@ -313,7 +331,16 @@
                 wsam:Action="http://ws.broker.upa.pt/BrokerPort/sendInfoResponse"
                 message="tns:sendInfoResponse" />
         </operation>
+        <operation name="primaryLives">
+            <input
+                wsam:Action="http://ws.broker.upa.pt/BrokerPort/primaryLivesRequest"
+                message="tns:primaryLives" />
+            <output
+                wsam:Action="http://ws.broker.upa.pt/BrokerPort/primaryLivesResponse"
+                message="tns:primaryLivesResponse" />
+        </operation>
     </portType>
+
 
     <!-- SOAP/HTTP Binding -->
     <binding name="BrokerPortSoapHttpBinding" type="tns:BrokerPortType">
@@ -395,6 +422,16 @@
         </operation>
 
         <operation name="sendInfo">
+            <soap:operation soapAction="" />
+            <input>
+                <soap:body use="literal" />
+            </input>
+            <output>
+                <soap:body use="literal" />
+            </output>
+        </operation>
+
+        <operation name="primaryLives">
             <soap:operation soapAction="" />
             <input>
                 <soap:body use="literal" />
