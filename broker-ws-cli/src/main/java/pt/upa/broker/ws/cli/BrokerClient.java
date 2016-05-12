@@ -10,6 +10,8 @@ import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 import pt.upa.broker.ws.*;
 
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.BindingProvider;
 
 public class BrokerClient {
 
@@ -28,7 +30,7 @@ public class BrokerClient {
     String uURL = "http://localhost:9090";
     UDDINaming uddiNaming = new UDDINaming(uURL);
     String epAddress = uddiNaming.lookup(name);
-  
+
     _url = epAddress;
     if(epAddress == null){
       System.out.println("Broker not found");
@@ -70,8 +72,46 @@ public class BrokerClient {
     System.out.printf("Connection to %s succesfull%n", name);
   }
 
+  public void connectToBrokerPrimary() throws Exception{
+    String uURL = "http://localhost:9090";
+    UDDINaming uddiNaming = new UDDINaming(uURL);
+    String epAddress = uddiNaming.lookup("UpaBroker");
+
+    if(epAddress == null){
+      System.out.println("Broker not found");
+      return;
+    }
+    else System.out.printf("Connected to broker @%s%n", epAddress);
+
+    BrokerService service = new BrokerService();
+
+    broker = service.getBrokerPort();
+
+    BindingProvider bindingProvider = (BindingProvider) broker;
+
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, epAddress);
+  }
+
+  public void connectToBrokerSecondaryByURI(String endp) {
+    try{
+      BrokerPortType port = null;
+      BrokerService service = new BrokerService();
+      port = service.getBrokerPort();
+      System.out.println("Setting endpoint address ...");
+      BindingProvider bindingProvider = (BindingProvider) port;
+      Map<String, Object> requestContext = bindingProvider.getRequestContext();
+      requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endp);
+      System.out.println("Connection succesful to " + endp);
+      broker = port;
+    } catch(Exception e){
+      System.out.printf("Caught exception: %s%n", e);
+      e.printStackTrace();
+    }
+  }
+
   public String ping(String name){
-    int tries = 0; 
+    int tries = 0;
     while(tries < maxRetries){
       try{
         return broker.ping(name);
@@ -124,7 +164,17 @@ public class BrokerClient {
         connectToBroker("UpaBroker");
       }
     } catch (Exception e) {e.printStackTrace();}
+  }
 
+  public void sendInfo(String url){
+    broker.sendInfo(url);
+  }
 
+  public void update(TransportView tv){
+    broker.update(tv);
+  }
+
+  public void primaryLives(){
+    broker.primaryLivesAsync();
   }
 }
