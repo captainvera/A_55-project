@@ -33,15 +33,7 @@ public class TransporterPort implements TransporterPortType {
   protected int _idCounter;
   protected boolean _even;
   
-	@Resource
-	private WebServiceContext webServiceContext;
 
-  private void setMessageContext(){
-		MessageContext messageContext = webServiceContext.getMessageContext();
-		messageContext.put(SecurityHandler.WS_IDENTIFIER, _name);
-		messageContext.put(SecurityHandler.WS_KEYSTORE_FILE, "keys/"+_name+".jks");
-		messageContext.put(SecurityHandler.WS_CERT_FILE, "keys/"+_name+".cer");
-  }
   /**
    * -----------------------------------------------
    * Timer Logic
@@ -116,13 +108,10 @@ public class TransporterPort implements TransporterPortType {
   }
 
   public String ping(String name) {
-    setMessageContext();
     return _name;
   }
 
   public JobView requestJob(String origin, String destination, int price) throws BadLocationFault_Exception, BadPriceFault_Exception {
-    setMessageContext();
-  
     /**
      * Location checking ------------------------------------------------------------
      */
@@ -193,7 +182,6 @@ public class TransporterPort implements TransporterPortType {
   }
   
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
-    setMessageContext();
     Job jv = getJobByIdentifier(id);
     if(jv == null || jv.getJobState() != JobStateView.PROPOSED){
       BadJobFault bjf = new BadJobFault();
@@ -210,13 +198,11 @@ public class TransporterPort implements TransporterPortType {
   }
   
   public JobView jobStatus(String id) {
-    setMessageContext();
     Job j = getJobByIdentifier(id);
     return (j == null) ? null : j.toJobView();
   }
 
   public List<JobView> listJobs(){
-    setMessageContext();
     ArrayList<JobView> _jviews = new ArrayList<JobView>();
     for(Job j : _jobs){
       _jviews.add(j.toJobView());
@@ -225,7 +211,6 @@ public class TransporterPort implements TransporterPortType {
   }
 
   public void clearJobs(){
-    setMessageContext();
     _jobs.clear(); 
   }
 

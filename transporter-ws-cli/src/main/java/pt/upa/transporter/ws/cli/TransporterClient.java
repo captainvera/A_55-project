@@ -15,32 +15,25 @@ import javax.annotation.Resource;
 import pt.upa.Location;
 import pt.upa.ws.handler.SecurityHandler;
 
+import pt.upa.ws.Context;
+
 public class TransporterClient {
 
   TransporterPortType _transporter;
 
   private String _name;
  
-  private void setMessageContext(){
-    BindingProvider bindingProvider = (BindingProvider) _transporter;
-    Map<String, Object> requestContext = bindingProvider.getRequestContext();
-
-		requestContext.put(SecurityHandler.WS_IDENTIFIER, _name);
-		requestContext.put(SecurityHandler.WS_KEYSTORE_FILE, "keys/"+_name+".jks");
-		requestContext.put(SecurityHandler.WS_CERT_FILE, "keys/"+_name+".cer");
-  }
-
   public TransporterClient() {
-    _name = "UpaTransporter1";
+    _name = "Broker";
+    Context.WS_IDENTIFIER = _name;
+    Context.WS_KEYSTORE_FILE = "keys/"+_name+".jks";
   }
 
   public String ping() {
-    setMessageContext();
 		return _transporter.ping("name");
   }
  
   public JobView requestJob(String origin, String destination, int price) throws BadLocationFault_Exception, BadPriceFault_Exception {
-    setMessageContext();
     JobView response = null;
     response = _transporter.requestJob(origin, destination, price);
     return response;
@@ -89,24 +82,20 @@ public class TransporterClient {
   }
   
   public JobView decideJob(String id, boolean accept) throws BadJobFault_Exception {
-    setMessageContext();
     JobView response = null;
     response = _transporter.decideJob(id, accept);
     return response;
   }
 
   public JobView jobStatus(String id){
-    setMessageContext();
     return _transporter.jobStatus(id);
   } 
   
   public void clearJobs(){
-    setMessageContext();
     _transporter.clearJobs();
   }
 
   public List<JobView> listJobs() {
-    setMessageContext();
     return _transporter.listJobs();
   } 
 }

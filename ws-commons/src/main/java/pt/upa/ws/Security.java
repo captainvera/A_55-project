@@ -15,6 +15,10 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.Signature;
+
 import pt.upa.ca.ws.cli.CAClient;
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
@@ -65,4 +69,67 @@ public class Security {
       return null;
     }
   }
+
+  public static PublicKey getCAPublicKey(String keyStoreFilePath, String keyStorePassword) throws Exception {
+    KeyStore keystore = readKeystoreFile(keyStoreFilePath, keyStorePassword.toCharArray());
+    Certificate ca_cert = keystore.getCertificate("ca"); 
+    return ca_cert.getPublicKey();
+  }
+
+  public static PrivateKey getPrivateKeyFromKeystore(String keyStoreFilePath, char[] keyStorePassword,
+      String keyAlias, char[] keyPassword) throws Exception {
+
+    KeyStore keystore = readKeystoreFile(keyStoreFilePath, keyStorePassword);
+    PrivateKey key = (PrivateKey) keystore.getKey(keyAlias, keyPassword);
+
+    return key;
+  }
+
+  public static PublicKey getPublicKeyFromKeystore(String keyStoreFilePath, char[] keyStorePassword,
+      String keyAlias, char[] keyPassword) throws Exception {
+
+    KeyStore keystore = readKeystoreFile(keyStoreFilePath, keyStorePassword);
+    PublicKey key = (PublicKey) keystore.getKey(keyAlias, keyPassword);
+
+    return key;
+  }
+
+  public static KeyStore readKeystoreFile(String keyStoreFilePath, char[] keyStorePassword) throws Exception {
+    FileInputStream fis;
+    try {
+      fis = new FileInputStream(keyStoreFilePath);
+    } catch (FileNotFoundException e) {
+      System.err.println("Keystore file <" + keyStoreFilePath + "> not fount.");
+      return null;
+    }
+    KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+    keystore.load(fis, keyStorePassword);
+    return keystore;
+  }
+
+  public static boolean verifyDigitalSignature(byte[] cipherDigest, byte[] bytes, PublicKey publicKey)
+    throws Exception {
+
+    // verify the signature with the public key
+    Signature sig = Signature.getInstance("SHA1WithRSA");
+    sig.initVerify(publicKey);
+    sig.update(bytes);
+    try {
+      return sig.verify(cipherDigest);
+    } catch (SignatureException se) {
+      System.err.println("Caught exception while verifying signature " + se);
+      return false;
+    }
+  }
+
+	public static boolean verifySignedCertificate(Certificate certificate, PublicKey caPublicKey) {
+		try {
+			certificate.verify(caPublicKey);
+		} catch (InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException
+				| SignatureException e) {
+      System.out.println(e.getMessage());
+			return false;
+		}
+		return true;
+	}
 }

@@ -1,6 +1,9 @@
 <handler-chains xmlns="http://java.sun.com/xml/ns/javaee">
     <handler-chain>
         <handler>
+            <handler-class>pt.upa.ws.handler.NonceHandler</handler-class>
+        </handler>
+        <handler>
             <handler-class>pt.upa.ws.handler.SecurityHandler</handler-class>
         </handler>
     </handler-chain>

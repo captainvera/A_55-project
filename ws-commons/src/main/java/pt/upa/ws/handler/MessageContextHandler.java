@@ -13,12 +13,17 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
  */
 public class MessageContextHandler implements SOAPHandler<SOAPMessageContext> {
 
+    public String test = "NOT SET";
+
     public Set<QName> getHeaders() {
         return null;
     }
 
     public boolean handleMessage(SOAPMessageContext smc) {
-        printMessageContext(smc);
+       // printMessageContext(smc);
+        System.out.println("1: " + test);
+        test = "SET";
+        System.out.println("2: " + test);
         return true;
     }
 
@@ -51,15 +56,15 @@ public class MessageContextHandler implements SOAPHandler<SOAPMessageContext> {
                 else
                     valueString = value.toString();
 
-                Object scope = map.getScope(keyString);
-                String scopeString;
-                if (scope == null)
-                    scopeString = "null";
-                else
-                    scopeString = scope.toString();
-                scopeString = scopeString.toLowerCase();
+                //Object scope = map.getScope(keyString);
+                //String scopeString;
+                //if (scope == null)
+                //    scopeString = "null";
+                //else
+                //    scopeString = scope.toString();
+                //scopeString = scopeString.toLowerCase();
 
-                System.out.println("(" + scopeString + "," + keyString + ","
+                System.out.println("(" /*+ scopeString */+ "," + keyString + ","
                         + valueString + ")");
             }
 
