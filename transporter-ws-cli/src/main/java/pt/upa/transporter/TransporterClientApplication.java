@@ -3,6 +3,10 @@ package pt.upa.transporter;
 import java.util.List;
 import pt.upa.transporter.ws.cli.TransporterClient;
 import pt.upa.transporter.ws.*;
+import pt.upa.ws.Security;
+import java.security.cert.Certificate;
+
+import pt.upa.ws.Context;
 
 public class TransporterClientApplication {
 
@@ -14,6 +18,8 @@ public class TransporterClientApplication {
      */
     TransporterClient tc = new TransporterClient();
     try{
+      Certificate c = Security.getCertificateFromCA("UpaTransporter1");
+      System.out.println("Got certificate: " + c.toString());
       tc.connectToTransporter("UpaTransporter1");
       tc.ping();
       System.out.printf("[REQUEST] Portalegre->Lisboa for 10%n");
@@ -39,7 +45,7 @@ public class TransporterClientApplication {
         System.out.printf("[RESPONSE] %s | STATE: %s | PRICE: %d%n", j.getJobIdentifier(), j.getJobState().value(), j.getJobPrice());
       }
     }catch(Exception e){
-      System.out.println("Something fucked up!" + e.getMessage());
+      e.printStackTrace();
     }
   }
 }

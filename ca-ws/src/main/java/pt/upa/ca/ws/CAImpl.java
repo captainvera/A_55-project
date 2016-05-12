@@ -19,16 +19,15 @@ public class CAImpl implements CA {
 
   public CAImpl(){
     _certificates.put("UpaTransporter1", "keys/UpaTransporter1.cer");
-    _certificates.put("UpaTransporter2", "keys/upatransporter2.cer");
-    _certificates.put("Broker", "keys/broker.cer");
+    _certificates.put("UpaTransporter2", "keys/UpaTransporter2.cer");
+    _certificates.put("Broker", "keys/Broker.cer");
   }
 
   public String requestCertificate(String name) {
     System.out.println("--Retrieving certificate for " + name);
     byte[] data = readFile(_certificates.get(name));
 
-    System.out.println("--Encoding to Base64");
-    System.out.println("Sending data: "+ data);
+    System.out.println("--Encoding to Base64 and sending");
     return printBase64Binary(data);
   }
 

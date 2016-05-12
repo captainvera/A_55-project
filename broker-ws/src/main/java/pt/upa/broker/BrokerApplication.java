@@ -8,6 +8,8 @@ import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import javax.xml.ws.*;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
+import pt.upa.ws.Context;
+
 public class BrokerApplication {
 
 	public static void main(String[] args) throws Exception {
@@ -16,6 +18,9 @@ public class BrokerApplication {
 	String uddiURL = args[0];
 	String name = args[1];
 	String url = args[2];
+
+  Context.WS_KEYSTORE_FILE = "keys/Broker.jks";
+  Context.WS_IDENTIFIER = "Broker";
 
 	Endpoint endpoint = null;
 	UDDINaming uddiNaming = null;

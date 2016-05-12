@@ -6,6 +6,8 @@ import pt.upa.transporter.ws.*;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
+import pt.upa.ws.Context;
+
 public class TransporterApplication {
 
   private String _url, _name;
@@ -68,6 +70,9 @@ public class TransporterApplication {
     String uddiURL = args[0];
     String name = args[1];
     String url = args[2];
+
+    Context.WS_IDENTIFIER = name ;
+    Context.WS_KEYSTORE_FILE = "keys/" + name + ".jks";
 
     TransporterApplication tc = new TransporterApplication();
     try{
