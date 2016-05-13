@@ -16,7 +16,7 @@ public class TransporterClientApplication {
     /**
      * Very basic example execution for a TransporterClient
      */
-    TransporterClient tc = new TransporterClient();
+    TransporterClient tc = new TransporterClient("Broker");
     try{
       Certificate c = Security.getCertificateFromCA("UpaTransporter1");
       System.out.println("Got certificate: " + c.toString());

@@ -113,7 +113,7 @@ public class BrokerPort implements BrokerPortType{
   private void createTransporterClients( Collection<String> endpoints) throws JAXRException{
     String name;
     for (String endp : endpoints) {
-      TransporterClient client = new TransporterClient();
+      TransporterClient client = new TransporterClient("Broker");
       try{
         client.connectToTransporterByURI(endp);
         name = client.ping();

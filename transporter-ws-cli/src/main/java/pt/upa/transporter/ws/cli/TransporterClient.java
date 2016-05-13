@@ -23,8 +23,8 @@ public class TransporterClient {
 
   private String _name;
  
-  public TransporterClient() {
-    _name = "Broker";
+  public TransporterClient(String name) {
+    _name = name;
     Context.WS_IDENTIFIER = _name;
     Context.WS_KEYSTORE_FILE = "keys/"+_name+".jks";
   }

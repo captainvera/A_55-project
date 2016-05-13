@@ -25,9 +25,9 @@ public class TransporterITTest {
   @BeforeClass
   public static void oneTimeSetUp() {
     try {
-      _client = new TransporterClient();
-      _client_odd = new TransporterClient();
-      _client_even = new TransporterClient();
+      _client = new TransporterClient("Broker");
+      _client_odd = new TransporterClient("Broker");
+      _client_even = new TransporterClient("Broker");
 
       _client.connectToTransporter("UpaTransporter1");
       _client_odd.connectToTransporter("UpaTransporter1");

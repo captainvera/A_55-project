@@ -55,10 +55,6 @@ public class Security {
         return cert;
       }
 
-      /**
-       * TODO: CERT CACHE
-       */
-
       bis.close();
       sbis.close();
 

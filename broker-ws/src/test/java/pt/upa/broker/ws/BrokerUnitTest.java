@@ -65,7 +65,7 @@ public class BrokerUnitTest{
 			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
-			new TransporterClient();
+			new TransporterClient("Broker");
 
 			client.connectToTransporterByURI(anyString);
 			client.ping();
@@ -87,7 +87,7 @@ public class BrokerUnitTest{
 			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
-			new TransporterClient();
+			new TransporterClient("Broker");
 
 			client.connectToTransporterByURI(anyString);
 			client.ping();
@@ -112,7 +112,7 @@ public class BrokerUnitTest{
 			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
-			new TransporterClient();
+			new TransporterClient("Broker");
 
 			client.connectToTransporterByURI(anyString);
 			client.ping();
@@ -145,7 +145,7 @@ public class BrokerUnitTest{
 			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
-			new TransporterClient();
+			new TransporterClient("Broker");
 
 			client.connectToTransporterByURI(anyString);
 			client.ping();
@@ -163,7 +163,7 @@ public class BrokerUnitTest{
 			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
-			new TransporterClient();
+			new TransporterClient("Broker");
 
 			client.connectToTransporterByURI(anyString);
 			client.ping();
@@ -181,7 +181,7 @@ public class BrokerUnitTest{
 			uddi.list("UpaTransporter%");
 			result = _endpoints;
 
-			new TransporterClient();
+			new TransporterClient("Broker");
 
 			client.connectToTransporterByURI(anyString);
 			client.ping();
@@ -197,7 +197,7 @@ public class BrokerUnitTest{
 			new UDDINaming(anyString);
   		uddi.list("UpaTransporter%");
   		result = _endpoints;
-  		new TransporterClient();
+  		new TransporterClient("Broker");
   		client.connectToTransporterByURI(anyString);
   		client.ping();
   		result = "UpaTransporter1";
@@ -217,7 +217,7 @@ public class BrokerUnitTest{
   		uddi.list("UpaTransporter%");
   		result = _endpoints;
 
-  		new TransporterClient();
+  		new TransporterClient("Broker");
 
   		client.connectToTransporterByURI(anyString);
   		client.ping();

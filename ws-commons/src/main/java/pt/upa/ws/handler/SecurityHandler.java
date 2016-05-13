@@ -56,10 +56,6 @@ import pt.upa.ws.Context;
 
 public class SecurityHandler implements SOAPHandler<SOAPMessageContext> {
 
-  public static final String WS_IDENTIFIER = "pt.upa.ws.identifier";
-  public static final String WS_KEYSTORE_FILE = "pt.upa.ws.keystorefile";
-  public static final String WS_CERT_FILE = "pt.upa.ws.certfile";
-
   private TreeMap<String, Certificate> _cache = new TreeMap<String, Certificate>();
 
   private String _WS_IDENTIFIER;
