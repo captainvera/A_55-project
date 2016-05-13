@@ -339,7 +339,7 @@ public class BrokerPort implements BrokerPortType{
       public void run() {
         try{
           if (_broker != null)
-          _broker.primaryLives();
+            _broker.primaryLives();
         } catch(WebServiceException wse){
           System.out.println("Secondary has been lost.");
           removeSecondary();
@@ -394,6 +394,9 @@ public class BrokerPort implements BrokerPortType{
 
   public void sendInfo(String url){
     connectToBrokerByURI(url);
+    for(Transport t : _transports){
+      _broker.update(t.toTransportView());
+    }
     stillAlive(aliveTime);
   }
 
