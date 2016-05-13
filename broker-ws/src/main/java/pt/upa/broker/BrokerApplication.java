@@ -88,9 +88,4 @@ public class BrokerApplication {
 
 	}
 
-  private void rebindUDDI(String uddiURL, String name, String url){
-    System.out.printf("Publishing to UDDI: %s%n With name: %s%n", uddiURL, name);
-    uddiNaming = new UDDINaming(uddiURL);
-    uddiNaming.rebind(name, url)
-  }
 }

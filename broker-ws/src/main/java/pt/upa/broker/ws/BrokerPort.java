@@ -56,8 +56,8 @@ public class BrokerPort implements BrokerPortType{
     }
     else{
       connectToBroker();
-      System.out.println("Sending my URL to the primary Broker");
-      _broker.sendInfo(url);
+      if(_broker != null)
+        _broker.sendInfo(url);
       isAlive(waitTime);
     }
     System.out.println("Broker Initalized.");
@@ -82,6 +82,10 @@ public class BrokerPort implements BrokerPortType{
 
     Map<String, Object> requestContext = bindingProvider.getRequestContext();
     requestContext.put(ENDPOINT_ADDRESS_PROPERTY, epAddress);
+
+    try{
+      _broker.ping("test");
+    } catch (WebServiceException e) { _broker= null;}
   }
 
   public void connectToBrokerByURI(String endp) {
@@ -334,14 +338,12 @@ public class BrokerPort implements BrokerPortType{
       @Override
       public void run() {
         try{
-          if (_broker != null){
-            System.out.println("I'm still alive!");
-            _broker.primaryLives();
-          }
+          if (_broker != null)
+          _broker.primaryLives();
         } catch(WebServiceException wse){
           System.out.println("Secondary has been lost.");
           removeSecondary();
-        }
+        }  
         stillAlive(time);
       }
     };
@@ -367,7 +369,7 @@ public class BrokerPort implements BrokerPortType{
     _timer.schedule(_timerTask, time*1000);
   }
 
-  private void GYST() throws Exception{
+  public void GYST() throws Exception{
     _primary = true;
     System.out.println("ASSUMING CONTROL");
     connectToTransporters();
@@ -379,19 +381,15 @@ public class BrokerPort implements BrokerPortType{
   }
 
   public void update(TransportView transport) {
-    System.out.println("Updating Broker.....");
     if(_primary == false)
       isAlive(waitTime);
     Transport transportToUpdate = getTransportById(transport.getId());
     if (transportToUpdate == null) {
-      System.out.println("Transport not found... Creating.....");
       transportToUpdate = new Transport(transport);
       _transports.add(transportToUpdate);
-      System.out.println("Update done!");
       return ;
     }
     transportToUpdate.setState(transport.getState());
-    System.out.println("Update done!");
   }
 
   public void sendInfo(String url){
