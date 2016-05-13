@@ -248,6 +248,34 @@ public class BrokerUnitTest{
 
 	}
 
+  @Test
+  public void switchBrokers() throws Exception{
+    System.out.println("[TEST] switch brokers");
 
+		populate();
+
+    new MockUp<BrokerPort>() {
+      @Mock public void sendInfo(String anyString){
+        broker.connectToBrokerByURI("http://localhost:8070/broker-ws/endpoint");
+      }
+      @Mock public void connectToTransporters(){
+      }
+    }; 
+
+    new StrictExpectations(){{
+      new UDDINaming(anyString);
+      uddi.lookup("UpaBroker"); 
+      result = "http://localhost:8080/broker-ws/endpoint";
+
+      new UDDINaming(anyString);
+      uddi.rebind("UpaBroker", "http://localhost:8070/broker-ws/endpoint"); 
+    }};
+
+    
+    BrokerPort broker1 = new BrokerPort(false, "http://localhost:8070/broker-ws/endpoint");
+  
+   broker1.isAlive(0);
+   Thread.sleep(1000);
+  }
 
 }

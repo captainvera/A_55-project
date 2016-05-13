@@ -1,7 +1,7 @@
 package pt.upa.ws.handler;
 
 import java.util.Set;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
@@ -20,7 +20,9 @@ import pt.upa.ws.Handlers;
  */
 public class NonceHandler implements SOAPHandler<SOAPMessageContext> {
 
-  private ArrayList<Long> _once = new ArrayList<Long>();
+  //TODO change to HashSet
+  private HashSet<Long> _once = new HashSet<Long>();
+  private HashSet<Long> _generated = new HashSet<Long>();
 
   public Set<QName> getHeaders() {
     return null;
@@ -49,7 +51,7 @@ public class NonceHandler implements SOAPHandler<SOAPMessageContext> {
         return true;
       }
     }catch(Exception e){
-      return false; 
+      throw new RuntimeException();
     }
   }
 
@@ -76,7 +78,7 @@ public class NonceHandler implements SOAPHandler<SOAPMessageContext> {
         return true;
       }
     }catch(Exception e){
-      return false; 
+      throw new RuntimeException();
     }
   }
 
@@ -86,10 +88,10 @@ public class NonceHandler implements SOAPHandler<SOAPMessageContext> {
 
   public long getUniqueNonce(){
     long l = generateRandomSecureLong();
-    while(nonceUsed(l)){
+    while(nonceGenerated(l)){
       l = generateRandomSecureLong();
     }
-    addNonce(l); 
+    addGeneratedNonce(l); 
     return l;
   }
 
@@ -103,6 +105,10 @@ public class NonceHandler implements SOAPHandler<SOAPMessageContext> {
 
   public boolean nonceUsed(long nonce){
     return _once.contains(nonce); 
+  }
+
+  public boolean nonceGenerated(long nonce){
+    return _generated.contains(nonce); 
   }
 
   public long generateRandomSecureLong(){
@@ -122,5 +128,9 @@ public class NonceHandler implements SOAPHandler<SOAPMessageContext> {
 
   public void addNonce(long nonce){
     _once.add(nonce);
+  }
+
+  public void addGeneratedNonce(long nonce){
+    _generated.add(nonce);
   }
 }

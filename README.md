@@ -65,54 +65,82 @@ mvn clean install
 
 -------------------------------------------------------------------------------
 
-### Serviço TRANSPORTER
+### Serviço CA
 
-[1] Construir o servidor Transporter e executar duas instancias do Transporter de forma a permitir os testes do client
+[1] Construir o servidor CA e executar para permitir a instalação do cliente
 
 ```
-cd  transporter-ws
+cd  ../ca-ws
 mvn clean install
 
-mvn exec:java -Dws.i=1
-mvn exec:java -Dws.i=2
+mvn exec:java
 
 ```
 
-[2] Construir cliente Transporter e executar testes
+[2] Noutra consola, construir cliente CA de forma a instalar o cliente
 
 ```
 
-cd transporter-ws-cli
+cd ca-ws-cli
 mvn clean install
 
 ```
 
 ...
 
+-------------------------------------------------------------------------------
+
+### Ws Commons
+
+[1] Construir e instalar as classes comuns (handlers, location, etc)
+
+```
+cd ../ws-commons
+mvn clean install
+
+```
 
 -------------------------------------------------------------------------------
 
-### Serviço BROKER
+### Serviço Transporter
 
-[1] Construir e executar o servidor Broker para permitir os testes de integracao
+[1] Construir e executar o servidor Transporter e executar 2 instâncias para permitir os testes de integracao
 
 ```
-cd broker-ws
+cd ../transporter-ws
 mvn clean install
-mvn exec:java
-
-```
-
-
-[2] Construir cliente do Broker e executar testes
-
-```
-cd transporter-ws
 mvn exec:java -Dws.i=1
-mvn exec:java -Dws.i=2
+mvn exec:java -Dws.i=2 (noutra consola na mesma directoria)
 
-cd ../broker-ws-cli
+```
+
+[2] Noutra consola, construir cliente do Transporter e executar testes
+
+```
+cd transporter-ws-cli
 mvn clean install
+
+```
+
+-------------------------------------------------------------------------------
+
+### Serviço Broker
+
+[1] Construir o servidor Broker e executar um Broker primário e um secundário
+
+```
+cd ../broker-ws
+mvn clean install
+mvn exec:java -Dws.port=8080
+mvn exec:java -Dws.port=8070 (noutra consola na mesma directoria)
+
+```
+
+[2] Noutra consola, construir cliente do Broker e executar o "Front End"
+
+```
+cd ../broker-ws-cli
+mvn clean install exec:java
 
 ```
 

@@ -21,7 +21,7 @@
     <wsdl.directory>${basedir}/../broker-ws/src/main/resources</wsdl.directory>
     <wsdl.filename>broker.2_0.wsdl</wsdl.filename>
 
-    <mainclass>pt.upa.broker.BrokerClientApplication</mainclass>
+    <mainclass>pt.upa.broker.FrontEnd</mainclass>
 
     <ws.name>UpaBroker</ws.name>
     <uddi.url>http://localhost:9090</uddi.url>
