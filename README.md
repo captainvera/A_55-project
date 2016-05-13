@@ -65,24 +65,23 @@ mvn clean install
 
 -------------------------------------------------------------------------------
 
-### Serviço TRANSPORTER
+### Serviço CA
 
-[1] Construir o servidor Transporter e executar duas instancias do Transporter de forma a permitir os testes do client
+[1] Construir o servidor CA e executar para permitir a instalação do client
 
 ```
-cd  transporter-ws
+cd  ../ca-ws
 mvn clean install
 
-mvn exec:java -Dws.i=1
-mvn exec:java -Dws.i=2
+mvn exec:java
 
 ```
 
-[2] Construir cliente Transporter e executar testes
+[2] Construir cliente CA de forma a instalar o cliente
 
 ```
 
-cd transporter-ws-cli
+cd ../ca-ws-cli
 mvn clean install
 
 ```
@@ -92,26 +91,22 @@ mvn clean install
 
 -------------------------------------------------------------------------------
 
-### Serviço BROKER
+### Serviço Transporter
 
-[1] Construir e executar o servidor Broker para permitir os testes de integracao
+[1] Construir e executar o servidor Transporter e executar 2 instâncias para permitir os testes de integracao
 
 ```
-cd broker-ws
+cd ../transporter-ws
 mvn clean install
-mvn exec:java
-
-```
-
-
-[2] Construir cliente do Broker e executar testes
-
-```
-cd transporter-ws
 mvn exec:java -Dws.i=1
-mvn exec:java -Dws.i=2
+mvn exec:java -Dws.i=1
 
-cd ../broker-ws-cli
+```
+
+[2] Construir cliente do Transporter e executar testes
+
+```
+cd ../transporter-ws-cli
 mvn clean install
 
 ```
