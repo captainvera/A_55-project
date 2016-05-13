@@ -61,7 +61,7 @@ public class PenetrationTestHandler implements SOAPHandler<SOAPMessageContext> {
    * and output the message. The writeTo() method can throw SOAPException or
    * IOException
    */
-  private void tamperIdentifier(SOAPMessageContext smc) throws Exception {
+  public void tamperIdentifier(SOAPMessageContext smc) throws Exception {
     SOAPMessage message = smc.getMessage();
 
     SOAPPart soapPart = message.getSOAPPart();
@@ -72,17 +72,17 @@ public class PenetrationTestHandler implements SOAPHandler<SOAPMessageContext> {
       _old_nonce = Handlers.getHeader(soapEnvelope, "nonce");
     }else{
 
-       Name qname = soapEnvelope.createName("nonce", "pt.upa", "http://pt.upa"); 
+       Name qname = soapEnvelope.createName("identifier", "pt.upa", "http://pt.upa"); 
       SOAPHeader soapHeader = soapEnvelope.getHeader();
 
       Iterator it = soapHeader.getChildElements(qname);
 
       SOAPElement element = (SOAPElement) it.next();
-      element.setValue(_old_nonce);
+      element.setValue("WRONGID");
     }
   }
 
-  private void tamperNonce(SOAPMessageContext smc) throws Exception {
+  public void tamperNonce(SOAPMessageContext smc) throws Exception {
     SOAPMessage message = smc.getMessage();
 
     SOAPPart soapPart = message.getSOAPPart();
@@ -93,7 +93,7 @@ public class PenetrationTestHandler implements SOAPHandler<SOAPMessageContext> {
       _old_nonce = Handlers.getHeader(soapEnvelope, "nonce");
     }else{
 
-       Name qname = soapEnvelope.createName("nonce", "pt.upa", "http://pt.upa"); 
+      Name qname = soapEnvelope.createName("nonce", "pt.upa", "http://pt.upa"); 
       SOAPHeader soapHeader = soapEnvelope.getHeader();
 
       Iterator it = soapHeader.getChildElements(qname);
@@ -103,7 +103,7 @@ public class PenetrationTestHandler implements SOAPHandler<SOAPMessageContext> {
     }
   }
 
-  private void tamperBody(SOAPMessageContext smc) throws Exception {
+  public void tamperBody(SOAPMessageContext smc) throws Exception {
     SOAPMessage message = smc.getMessage();
 
     SOAPPart soapPart = message.getSOAPPart();
@@ -115,7 +115,7 @@ public class PenetrationTestHandler implements SOAPHandler<SOAPMessageContext> {
     // System.out.println("Got content: " + content);  
   }
 
-  private void logBody(SOAPMessageContext smc) throws Exception {
+  public void logBody(SOAPMessageContext smc) throws Exception {
     SOAPMessage message = smc.getMessage();      
     StringBuffer sbuf = new StringBuffer();
     try {
