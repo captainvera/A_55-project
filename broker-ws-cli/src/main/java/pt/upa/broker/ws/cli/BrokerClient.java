@@ -28,7 +28,7 @@ public class BrokerClient {
     String uURL = "http://localhost:9090";
     UDDINaming uddiNaming = new UDDINaming(uURL);
     String epAddress = uddiNaming.lookup(name);
-  
+
     _url = epAddress;
     if(epAddress == null){
       System.out.println("Broker not found");
@@ -71,7 +71,7 @@ public class BrokerClient {
   }
 
   public String ping(String name){
-    int tries = 0; 
+    int tries = 0;
     while(tries < maxRetries){
       try{
         return broker.ping(name);
@@ -87,30 +87,81 @@ public class BrokerClient {
     return null;
   }
   public void clearTransports(){
-    System.out.println("Clearing all Jobs...");
-    broker.clearTransports();
-    System.out.println("Jobs cleared for all Transporters");
-
+    int tries = 0;
+    while(tries < maxRetries){
+      try{
+        System.out.println("Clearing all Jobs...");
+        broker.clearTransports();
+        System.out.println("Jobs cleared for all Transporters");
+        return ;
+      } catch(WebServiceException wse){
+        tries++;
+        System.out.println("Connection Error.\nAttempting to reconect\n");
+        handleURLChange();
+        try{
+          Thread.sleep(2000);
+        } catch(Exception e){ e.printStackTrace();}
+      }
+    }
   }
 
   public TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
-    System.out.println("Retrieving transport with " + id);
-    TransportView response = null;
-    response = broker.viewTransport(id);
-    return response;
+    int tries = 0;
+    while(tries < maxRetries){
+      try{
+        System.out.println("Retrieving transport with " + id);
+        TransportView response = null;
+        response = broker.viewTransport(id);
+        return response;
+      } catch(WebServiceException wse){
+        tries++;
+        System.out.println("Connection Error.\nAttempting to reconect\n");
+        handleURLChange();
+        try{
+          Thread.sleep(2000);
+        } catch(Exception e){ e.printStackTrace();}
+      }
+    }
+    return null;
   }
 
   public String requestTransport(String origin, String destination, int priceMax)
     throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
-                    UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
-             System.out.println("Request Received Origin: " + origin + " Destination: " + destination);
-             String response = null;
-             response = broker.requestTransport(origin, destination, priceMax);
-             return response;
-  }
+    UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+      int tries = 0;
+      while(tries < maxRetries){
+        try{
+          System.out.println("Request Received Origin: " + origin + " Destination: " + destination);
+          String response = null;
+          response = broker.requestTransport(origin, destination, priceMax);
+          return response;
+        } catch(WebServiceException wse){
+          tries++;
+          System.out.println("Connection Error.\nAttempting to reconect\n");
+          handleURLChange();
+          try{
+            Thread.sleep(2000);
+          } catch(Exception e){ e.printStackTrace();}
+        }
+      }
+      return null;
+    }
 
   public List<TransportView> listTransports(){
-    return broker.listTransports();
+    int tries = 0;
+    while(tries < maxRetries){
+      try{
+        return broker.listTransports();
+      } catch(WebServiceException wse){
+        tries++;
+        System.out.println("Connection Error.\nAttempting to reconect\n");
+        handleURLChange();
+        try{
+          Thread.sleep(2000);
+        } catch(Exception e){ e.printStackTrace();}
+      }
+    }
+    return null;
   }
 
   private void handleURLChange() {
