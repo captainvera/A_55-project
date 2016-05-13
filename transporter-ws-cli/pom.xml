@@ -39,6 +39,11 @@
       <artifactId>uddi-naming</artifactId>
       <version>1.0</version>
     </dependency>
+    <dependency>
+      <groupId>pt.upa.a55</groupId>
+      <artifactId>ws-commons</artifactId>
+      <version>1.0</version>
+    </dependency>
     <!-- JMockit - must appear before JUnit -->
     <dependency>
       <groupId>org.jmockit</groupId>
