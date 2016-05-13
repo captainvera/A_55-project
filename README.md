@@ -110,14 +110,14 @@ mvn clean install
 cd ../transporter-ws
 mvn clean install
 mvn exec:java -Dws.i=1
-mvn exec:java -Dws.i=1
+mvn exec:java -Dws.i=2 (noutra consola na mesma directoria)
 
 ```
 
-[2] Construir cliente do Transporter e executar testes
+[2] Noutra consola, construir cliente do Transporter e executar testes
 
 ```
-cd ../transporter-ws-cli
+cd transporter-ws-cli
 mvn clean install
 
 ```
@@ -132,11 +132,11 @@ mvn clean install
 cd ../broker-ws
 mvn clean install
 mvn exec:java -Dws.port=8080
-mvn exec:java -Dws.port=8070
+mvn exec:java -Dws.port=8070 (noutra consola na mesma directoria)
 
 ```
 
-[2] Construir cliente do Broker e executar o "Front End"
+[2] Noutra consola, construir cliente do Broker e executar o "Front End"
 
 ```
 cd ../broker-ws-cli
