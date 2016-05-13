@@ -45,7 +45,7 @@ public class BrokerApplication {
 		System.out.printf("Publishing endpoint %s%n", url);
 		endpoint.publish(url);
 
-		//publishing to oDDI
+		//publishing to UDDI
 		if(_broker.isConnectedPrimary() == false){
       if(_broker.getPrimary() == false){
         _broker.GYST();
@@ -84,7 +84,7 @@ public class BrokerApplication {
 			System.out.printf("Caught exception when unbinding: %s%n", e);
 		}
 	}
-  
+
 
 	}
 
