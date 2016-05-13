@@ -88,6 +88,17 @@ mvn clean install
 
 ...
 
+-------------------------------------------------------------------------------
+
+### Ws Commons
+
+[1] Construir e instalar as classes comuns (handlers, location, etc)
+
+```
+cd ../ws-commons
+mvn clean install
+
+```
 
 -------------------------------------------------------------------------------
 
@@ -108,6 +119,28 @@ mvn exec:java -Dws.i=1
 ```
 cd ../transporter-ws-cli
 mvn clean install
+
+```
+
+-------------------------------------------------------------------------------
+
+### Serviço Broker
+
+[1] Construir o servidor Broker e executar um Broker primário e um secundário
+
+```
+cd ../broker-ws
+mvn clean install
+mvn exec:java -Dws.port=8080
+mvn exec:java -Dws.port=8070
+
+```
+
+[2] Construir cliente do Broker e executar o "Front End"
+
+```
+cd ../broker-ws-cli
+mvn clean install exec:java
 
 ```
 
