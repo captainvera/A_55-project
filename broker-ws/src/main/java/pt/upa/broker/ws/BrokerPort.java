@@ -8,6 +8,7 @@ import java.util.TimerTask;
 
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
+import javax.xml.ws.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -331,8 +332,13 @@ public class BrokerPort implements BrokerPortType{
     TimerTask _timerTask = new TimerTask() {
       @Override
       public void run() {
-        if (_broker != null)
+        try{
+          if (_broker != null)
           _broker.primaryLives();
+        } catch(WebServiceException wse){
+          System.out.println("Secondary has been lost.");
+          removeSecondary();
+        }  
         stillAlive(time);
       }
     };
@@ -392,5 +398,19 @@ public class BrokerPort implements BrokerPortType{
       System.out.println("Primary still alive!");
       isAlive(waitTime);
     }
+  }
+
+  public void shutdown(){
+    if(_timer != null)
+      _timer.cancel();
+  }
+
+  public boolean getPrimary(){
+    return _primary;
+  }
+
+  private void removeSecondary(){
+    _broker = null;
+    _timer.cancel();
   }
 }

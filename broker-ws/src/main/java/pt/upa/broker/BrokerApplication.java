@@ -38,7 +38,8 @@ public class BrokerApplication {
 			System.out.println("[DEBUG] I'm secondary!");
 		}
 
-		endpoint = Endpoint.create(new BrokerPort(isPrimary, url));
+    BrokerPort _broker = new BrokerPort(isPrimary, url);
+		endpoint = Endpoint.create(_broker);
 
 		//publishing endpoint
 		System.out.printf("Publishing endpoint %s%n", url);
@@ -54,6 +55,9 @@ public class BrokerApplication {
 		System.out.println("Waiting for connections");
 		System.out.println("Time is money, friend!");
 		System.in.read();
+    isPrimary = _broker.getPrimary();
+    _broker.shutdown();
+
 	}catch (Exception e){
 		System.out.printf("Caught exception: %s%n", e);
 		e.printStackTrace();
@@ -68,7 +72,7 @@ public class BrokerApplication {
 		}
 
 		try {
-			if (uddiNaming != null) {
+			if (uddiNaming != null && isPrimary) {
 				uddiNaming.unbind(name);
 				System.out.printf("Deleted '%s' from UDDI@ %s%n", name, uddiURL);
 			}
