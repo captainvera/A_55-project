@@ -10,6 +10,8 @@ import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 import pt.upa.broker.ws.*;
 
+import javax.xml.ws.AsyncHandler;
+import javax.xml.ws.BindingProvider;
 
 public class BrokerClient {
 
@@ -28,7 +30,7 @@ public class BrokerClient {
     String uURL = "http://localhost:9090";
     UDDINaming uddiNaming = new UDDINaming(uURL);
     String epAddress = uddiNaming.lookup(name);
-  
+
     _url = epAddress;
     if(epAddress == null){
       System.out.println("Broker not found");
@@ -70,8 +72,46 @@ public class BrokerClient {
     System.out.printf("Connection to %s succesfull%n", name);
   }
 
+  public void connectToBrokerPrimary() throws Exception{
+    String uURL = "http://localhost:9090";
+    UDDINaming uddiNaming = new UDDINaming(uURL);
+    String epAddress = uddiNaming.lookup("UpaBroker");
+
+    if(epAddress == null){
+      System.out.println("Broker not found");
+      return;
+    }
+    else System.out.printf("Connected to broker @%s%n", epAddress);
+
+    BrokerService service = new BrokerService();
+
+    broker = service.getBrokerPort();
+
+    BindingProvider bindingProvider = (BindingProvider) broker;
+
+    Map<String, Object> requestContext = bindingProvider.getRequestContext();
+    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, epAddress);
+  }
+
+  public void connectToBrokerSecondaryByURI(String endp) {
+    try{
+      BrokerPortType port = null;
+      BrokerService service = new BrokerService();
+      port = service.getBrokerPort();
+      System.out.println("Setting endpoint address ...");
+      BindingProvider bindingProvider = (BindingProvider) port;
+      Map<String, Object> requestContext = bindingProvider.getRequestContext();
+      requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endp);
+      System.out.println("Connection succesful to " + endp);
+      broker = port;
+    } catch(Exception e){
+      System.out.printf("Caught exception: %s%n", e);
+      e.printStackTrace();
+    }
+  }
+
   public String ping(String name){
-    int tries = 0; 
+    int tries = 0;
     while(tries < maxRetries){
       try{
         return broker.ping(name);
@@ -86,31 +126,81 @@ public class BrokerClient {
     }
     return null;
   }
-  public void clearTransports(){
-    System.out.println("Clearing all Jobs...");
-    broker.clearTransports();
-    System.out.println("Jobs cleared for all Transporters");
 
+  public void clearTransports(){
+    int tries = 0;
+    while(tries < maxRetries){
+      try{
+        System.out.println("Clearing all Jobs...");
+        broker.clearTransports();
+        System.out.println("Jobs cleared for all Transporters");
+      } catch(WebServiceException wse){
+        tries++;
+        System.out.println("Connection Error.\nAttempting to reconect\n");
+        handleURLChange();
+        try{
+          Thread.sleep(1000);
+        } catch(Exception e){ e.printStackTrace();}
+      }
+    }
   }
 
   public TransportView viewTransport(String id) throws UnknownTransportFault_Exception{
-    System.out.println("Retrieving transport with " + id);
+    int tries = 0;
     TransportView response = null;
-    response = broker.viewTransport(id);
+    while(tries < maxRetries){
+      try{
+        System.out.println("Retrieving transport with " + id);
+        response = broker.viewTransport(id);
+      } catch(WebServiceException wse){
+        tries++;
+        System.out.println("Connection Error.\nAttempting to reconect\n");
+        handleURLChange();
+        try{
+          Thread.sleep(1000);
+        } catch(Exception e){ e.printStackTrace();}
+      }
+    }
     return response;
   }
 
   public String requestTransport(String origin, String destination, int priceMax)
     throws InvalidPriceFault_Exception, UnavailableTransportFault_Exception,
-                    UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
-             System.out.println("Request Received Origin: " + origin + " Destination: " + destination);
-             String response = null;
-             response = broker.requestTransport(origin, destination, priceMax);
-             return response;
+    UnavailableTransportPriceFault_Exception, UnknownLocationFault_Exception {
+      int tries = 0;
+      String response = null;
+      while(tries < maxRetries){
+        try{
+          System.out.println("Request Received Origin: " + origin + " Destination: " + destination);
+          response = broker.requestTransport(origin, destination, priceMax);
+        } catch(WebServiceException wse){
+          tries++;
+          System.out.println("Connection Error.\nAttempting to reconect\n");
+          handleURLChange();
+          try{
+            Thread.sleep(1000);
+          } catch(Exception e){ e.printStackTrace();}
+        }
+      }
+      return response;
   }
 
   public List<TransportView> listTransports(){
-    return broker.listTransports();
+    int tries = 0;
+    List<TransportView> trans = new ArrayList<TransportView>();
+    while (tries < maxRetries){
+      try{
+        trans = broker.listTransports();
+      } catch(WebServiceException wse){
+        tries++;
+        System.out.println("Connection Error.\nAttempting to reconect\n");
+        handleURLChange();
+        try{
+          Thread.sleep(1000);
+        } catch(Exception e){ e.printStackTrace();}
+      }
+    }
+    return trans;
   }
 
   private void handleURLChange() {
@@ -124,7 +214,53 @@ public class BrokerClient {
         connectToBroker("UpaBroker");
       }
     } catch (Exception e) {e.printStackTrace();}
-
-
   }
+
+  public void sendInfo(String url){
+    int tries = 0;
+    while(tries < maxRetries){
+      try{
+        broker.sendInfo(url);
+      } catch(WebServiceException wse){
+        tries++;
+        System.out.println("Connection Error.\nAttempting to reconect\n");
+        handleURLChange();
+        try{
+          Thread.sleep(1000);
+        } catch(Exception e){ e.printStackTrace();}
+      }
+    }
+  }
+
+  public void update(TransportView tv){
+    int tries = 0;
+    while(tries < maxRetries){
+      try{
+        broker.update(tv);
+      } catch(WebServiceException wse){
+        tries++;
+        System.out.println("Connection Error.\nAttempting to reconect\n");
+        handleURLChange();
+        try{
+          Thread.sleep(1000);
+        } catch(Exception e){ e.printStackTrace();}
+      }
+    }
+  }
+
+  public void primaryLives(){
+    int tries = 0;
+      while(tries < maxRetries){
+        try{
+          broker.primaryLives();
+        } catch(WebServiceException wse){
+          tries++;
+          System.out.println("Connection Error.\nAttempting to reconect\n");
+          handleURLChange();
+          try{
+            Thread.sleep(1000);
+          } catch(Exception e){ e.printStackTrace();}
+        }
+      }
+    }
 }

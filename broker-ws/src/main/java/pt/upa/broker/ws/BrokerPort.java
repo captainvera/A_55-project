@@ -12,12 +12,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.jws.WebService;
-import javax.xml.ws.BindingProvider;
+
 import javax.xml.registry.JAXRException;
+
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import pt.upa.transporter.ws.*;
 import pt.upa.transporter.ws.cli.*;
+
+import pt.upa.broker.ws.cli.*;
 
 import pt.upa.Location;
 
@@ -36,7 +39,7 @@ public class BrokerPort implements BrokerPortType{
   ArrayList<Transport> _transports = new ArrayList<Transport>();
   int _idCounter;
   private Timer _timer;
-  BrokerPortType _broker;
+  BrokerClient _broker;
   boolean _primary;
   private String _url;
   final private int aliveTime = 1; //When a secondary broker is connected, send life proof every aliveTime seconds.
@@ -50,54 +53,18 @@ public class BrokerPort implements BrokerPortType{
   public BrokerPort(boolean primary, String url) throws Exception{
     _url = url;
     _primary = primary;
+    _broker = new BrokerClient();
     if(primary){
       connectToTransporters();
     }
     else{
-      connectToBroker();
+      _broker.connectToBrokerPrimary();
       _broker.sendInfo(url);
       isAlive(waitTime);
     }
     System.out.println("Broker Initalized.");
   }
 
-  public void connectToBroker() throws Exception{
-    String uURL = "http://localhost:9090";
-    UDDINaming uddiNaming = new UDDINaming(uURL);
-    String epAddress = uddiNaming.lookup("UpaBroker");
-
-    if(epAddress == null){
-      System.out.println("Broker not found");
-      return;
-    }
-    else System.out.printf("Connected to broker @%s%n", epAddress);
-
-    BrokerService service = new BrokerService();
-
-    _broker = service.getBrokerPort();
-
-    BindingProvider bindingProvider = (BindingProvider) _broker;
-
-    Map<String, Object> requestContext = bindingProvider.getRequestContext();
-    requestContext.put(ENDPOINT_ADDRESS_PROPERTY, epAddress);
-  }
-
-  public void connectToBrokerByURI(String endp) {
-    try{
-      BrokerPortType port = null;
-      BrokerService service = new BrokerService();
-      port = service.getBrokerPort();
-      System.out.println("Setting endpoint address ...");
-      BindingProvider bindingProvider = (BindingProvider) port;
-      Map<String, Object> requestContext = bindingProvider.getRequestContext();
-      requestContext.put(ENDPOINT_ADDRESS_PROPERTY, endp);
-      System.out.println("Connection succesful to " + endp);
-      _broker = port;
-    } catch(Exception e){
-      System.out.printf("Caught exception: %s%n", e);
-      e.printStackTrace();
-    }
-  }
 
   private void connectToTransporters() throws JAXRException{
     System.out.println("Checking for Transporters.");
@@ -170,7 +137,7 @@ public class BrokerPort implements BrokerPortType{
 			default:
 			break;
 		}
-		if(_primary && _broker != null) _broker.update(tv.toTransportView());
+		//if(_primary && _broker != null) _broker.update(tv.toTransportView());
 		return tv.toTransportView();
 	}
 
@@ -183,7 +150,7 @@ public class BrokerPort implements BrokerPortType{
 			i++;
 		}
     _transports.clear();
-		if(_primary && _broker != null) _broker.clearTransports();
+		//if(_primary && _broker != null) _broker.clearTransportsAsync();
 		System.out.println("The Sith Shall Rule again.");
 	}
 
@@ -323,7 +290,7 @@ public class BrokerPort implements BrokerPortType{
       newTransport.setState(TransportStateView.BOOKED);
     }
     _transports.add(newTransport);
-    if(_primary && _broker != null) _broker.update(newTransport.toTransportView());
+    //if(_primary && _broker != null) _broker.update(newTransport.toTransportView());
     return newTransport.getId();
   }
 
@@ -331,8 +298,10 @@ public class BrokerPort implements BrokerPortType{
     TimerTask _timerTask = new TimerTask() {
       @Override
       public void run() {
-        if (_broker != null)
+        if (_broker != null){
           _broker.primaryLives();
+          System.out.println("I'm still alive");
+        }
         stillAlive(time);
       }
     };
@@ -346,7 +315,7 @@ public class BrokerPort implements BrokerPortType{
     TimerTask _timerTask = new TimerTask() {
       @Override
       public void run() {
-        System.out.println("Primary is dead! dead I tell ya...");
+        System.out.println("Primary is dead! Dead I tell ya...");
         try{
           GYST();
         }catch (Exception e) {e.printStackTrace();}
@@ -355,7 +324,6 @@ public class BrokerPort implements BrokerPortType{
     if(_timer != null)
       _timer.cancel();
     _timer = new Timer();
-    System.out.println("Primary lives.");
     _timer.schedule(_timerTask, time*1000);
   }
 
@@ -371,6 +339,8 @@ public class BrokerPort implements BrokerPortType{
   }
 
   public void update(TransportView transport) {
+    System.out.println("[UPDATE] The internal state of the primary broker changed!");
+    System.out.println("[UPDATE] Starting update...");
     if(_primary == false)
       isAlive(waitTime);
     Transport transportToUpdate = getTransportById(transport.getId());
@@ -380,10 +350,11 @@ public class BrokerPort implements BrokerPortType{
       return ;
     }
     transportToUpdate.setState(transport.getState());
+    System.out.println("[UPDATE] Update finished");
   }
 
   public void sendInfo(String url){
-    connectToBrokerByURI(url);
+    _broker.connectToBrokerSecondaryByURI(url);
     stillAlive(aliveTime);
   }
 

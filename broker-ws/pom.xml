@@ -48,6 +48,11 @@
     </dependency>
     <dependency>
       <groupId>pt.upa.a55</groupId>
+      <artifactId>broker-ws-cli</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>pt.upa.a55</groupId>
       <artifactId>ws-commons</artifactId>
       <version>1.0</version>
     </dependency>
