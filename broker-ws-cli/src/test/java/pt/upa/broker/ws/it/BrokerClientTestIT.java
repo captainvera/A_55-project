@@ -118,5 +118,4 @@ public class BrokerClientTestIT {
       client.viewTransport("failTransport");
     }
 
-
 }
