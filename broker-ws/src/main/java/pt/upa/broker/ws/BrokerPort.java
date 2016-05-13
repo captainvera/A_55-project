@@ -413,4 +413,10 @@ public class BrokerPort implements BrokerPortType{
     _broker = null;
     _timer.cancel();
   }
+
+  public boolean isConnectedPrimary(){
+    if (_broker != null && _primary == false)
+      return true;
+    return false;
+  }
 }
