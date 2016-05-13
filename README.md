@@ -67,7 +67,7 @@ mvn clean install
 
 ### Serviço CA
 
-[1] Construir o servidor CA e executar para permitir a instalação do client
+[1] Construir o servidor CA e executar para permitir a instalação do cliente
 
 ```
 cd  ../ca-ws
@@ -77,11 +77,11 @@ mvn exec:java
 
 ```
 
-[2] Construir cliente CA de forma a instalar o cliente
+[2] Noutra consola, construir cliente CA de forma a instalar o cliente
 
 ```
 
-cd ../ca-ws-cli
+cd ca-ws-cli
 mvn clean install
 
 ```
