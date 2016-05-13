@@ -55,6 +55,7 @@ public class BrokerPort implements BrokerPortType{
     }
     else{
       connectToBroker();
+      System.out.println("Sending my URL to the primary Broker");
       _broker.sendInfo(url);
       isAlive(waitTime);
     }
@@ -331,8 +332,10 @@ public class BrokerPort implements BrokerPortType{
     TimerTask _timerTask = new TimerTask() {
       @Override
       public void run() {
-        if (_broker != null)
+        if (_broker != null){
+          System.out.println("I'm still alive!");
           _broker.primaryLives();
+        }
         stillAlive(time);
       }
     };
@@ -355,7 +358,6 @@ public class BrokerPort implements BrokerPortType{
     if(_timer != null)
       _timer.cancel();
     _timer = new Timer();
-    System.out.println("Primary lives.");
     _timer.schedule(_timerTask, time*1000);
   }
 
@@ -371,15 +373,19 @@ public class BrokerPort implements BrokerPortType{
   }
 
   public void update(TransportView transport) {
+    System.out.println("Updating Broker.....");
     if(_primary == false)
       isAlive(waitTime);
     Transport transportToUpdate = getTransportById(transport.getId());
     if (transportToUpdate == null) {
+      System.out.println("Transport not found... Creating.....");
       transportToUpdate = new Transport(transport);
       _transports.add(transportToUpdate);
+      System.out.println("Update done!");
       return ;
     }
     transportToUpdate.setState(transport.getState());
+    System.out.println("Update done!");
   }
 
   public void sendInfo(String url){
