@@ -48,7 +48,7 @@ mkdir proj-sd-55
 
 ```
 cd proj-sd-55
-git clone -b SD_R1 https://github.com/tecnico-distsys/A_55-project  
+git clone -b SD_R2 https://github.com/tecnico-distsys/A_55-project  
 
 cd A_55-project
 
