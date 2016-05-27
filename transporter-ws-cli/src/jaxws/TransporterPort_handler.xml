@@ -6,8 +6,5 @@
         <handler>
             <handler-class>pt.upa.ws.handler.SecurityHandler</handler-class>
         </handler>
-        <handler>
-            <handler-class>pt.upa.ws.handler.PenetrationTestHandler</handler-class>
-        </handler>
     </handler-chain>
 </handler-chains>

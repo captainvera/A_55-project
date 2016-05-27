@@ -19,6 +19,9 @@ import java.lang.StringBuffer;
 import java.util.Iterator;
 
 import pt.upa.ws.Handlers;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
 /**
  * This SOAPHandler outputs the contents of inbound and outbound messages.
  */
@@ -36,10 +39,15 @@ public class PenetrationTestHandler implements SOAPHandler<SOAPMessageContext> {
     try{
       Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
       if (outbound) {
-        // repeatMessage(smc);
-        // tamperNonce(smc);
-        // tamperBody(smc);
-        // logBody(smc);
+        int level = getVal();
+        if(level == 1)
+         repeatMessage(smc);
+        else if(level == 2)
+         tamperNonce(smc);
+        else if(level == 3)
+         tamperBody(smc);
+        else if(level == 4)
+         logBody(smc);
       }
     }catch(Exception e){
       return false;
@@ -143,4 +151,18 @@ public class PenetrationTestHandler implements SOAPHandler<SOAPMessageContext> {
       smc.setMessage(_old_message);
     }
   } 
+
+  public int getVal() throws Exception {
+    String result = "";
+    Properties prop = new Properties();
+    
+    InputStream input = new FileInputStream("config.properties");
+    if(input != null){
+      prop.load(input);
+      return Integer.parseInt(prop.getProperty("level"));
+    } else {
+      System.out.println("Config not found, default to 0");
+      return 0;
+    }
+  }
 }

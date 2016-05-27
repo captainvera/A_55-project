@@ -20,6 +20,7 @@ import java.security.PrivateKey;
 import java.security.Signature;
 
 import pt.upa.ca.ws.cli.CAClient;
+
 import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
 
 public class Security {
